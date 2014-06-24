@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    -->
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <meta charset=utf-8 />
+    <title>Spectrum analyzer - Syncretinal</title>
+
+    <style type="text/css" media="screen">
+
+        body {
+            font-family: sans-serif;
+            padding: 0;
+            margin: 0;
+            background-color: #000;
+        }
+
+        a {
+            color: #fff;
+            /* text-decoration: none; */
+        }
+
+        ul {
+            font-size: 0.75em;
+            margin: 1em;
+            padding: 0;
+        }
+
+        li {
+            margin: 0 0.5em 0 0;
+            padding: 0;
+            list-style-type: none;
+            display: inline;
+        }
+
+        #soundcloud {
+            /* background-color: #333; */
+            display: inline-block;
+            padding: 1em;
+            color: #fff;
+            font-size: 0.75em;
+            position: absolute;
+            top: 0;
+            right: 0;
+            /* opacity: 0.5; */
+        }
+            #soundcloud #credits { display: none; }
+            #soundcloud img { float: right; padding-left: 0.5em; }
+            #soundcloud button { float: right; clear: both; margin: 0.5em 0 0 0; }
+
+        canvas { position: absolute; z-index: -1; top: 0; left: 0; }
+            canvas#colourTable { right: 0; /* */ display: none; }
+
+    </style>
+
+    <script type="text/javascript">
+
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-3494214-5']);
+        _gaq.push(['_setDomainName', 'syncretinal.com']);
+        _gaq.push(['_trackPageview']);
+
+        (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+
+    </script>
+</head>
+<body>
+<div id="soundcloud">
+    <img src="soundcloud_logo.png" />
+    <div id="credits"><span id="title">title</span> uploaded by <a id="user" href="#">user</a></div>
+    <button id="loadSC">Load new song</button>
+    <!--
+    <hr />
+    -->
+    <!--
+    <a href="#" onclick="playPause(); return false;">pause</a>
+    -->
+</div>
+<ul id="songs">
+    <!--
+    <li><a class="song" href="https://soundcloud.com/pilsg/kanye-west-runaway-feat-pusha-t-2">[NO STREAMING] Kanye - Runaway</a></li>
+    -->
+    <li><a class="song" href="ACDC_-_Back_In_Black-sample.ogg">AC/DC</a></li>
+    <li><a class="song" href="05%20-%20Autechre%20-%20Basscadet.mp3">Autechre</a></li>
+
+    <li><a class="song" href="https://soundcloud.com/thrilljockey/matmos-teen-paranormal-romance">Matmos</a></li>
+    <li><a class="song" href="https://soundcloud.com/kidlogic/souls-of-mischief-93-till">KidLogic</a></li>
+    <li><a class="song" href="https://soundcloud.com/sgayam2/09-runaway-ft-pusha-t">Kanye</a></li>
+    <li><a class="song" href="https://soundcloud.com/dragonflyenergydrinks/pursuit-of-happiness-kid-cudi">Kid Cudi</a></li>
+</ul>
+<canvas id="songcanvas" width="1000" height="325"></canvas>
+<canvas id="colourTable" width="512" height="256"></canvas>
+<script>
+
+    /*
+    function playPause()
+    {
+        if ( audio.paused )
+        {
+            audio.play();
+        }
+        else
+        {
+            audio.pause();
+        }
+    }
+    */
+
+    window.audioContext = AudioContext || webkitAudioContext ;
+    var context = new audioContext();
+    var audioAnimation;
+    var audioBuffer;
+    var sourceNode;
+    var analyser;
+    var audio;
+    // get the context from the canvas to draw on
+    var canvas = document.getElementById('songcanvas');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+
+    var colours = document.getElementById('colourTable');
+    var coloursContext = colours.getContext("2d");
+
+
+    // Colours
+    var gradient = coloursContext.createLinearGradient(0,0,0,colours.height);
+    gradient.addColorStop(0,'#ffcc00');
+    gradient.addColorStop(0.5,'#006600');
+    gradient.addColorStop(1.0,'#000066');
+    coloursContext.fillStyle = gradient;
+    coloursContext.fillRect( 0, 0, colours.width, colours.height );
+
+
+    // /* Noise
+    var offsetX = colours.width * 0.075;
+    var x,y;
+    for ( var i = 0; i < 2500; i++ )
+    {
+        x = Math.floor( colours.width * Math.random() * 0.85 );
+        y = Math.floor( colours.height * Math.random() );
+
+        coloursContext.fillStyle = 'rgba( 255, 255, 255, 0.2 )';
+        coloursContext.fillRect( x  + offsetX, y, 1, 1 );
+        coloursContext.fill();
+    }
+    // */
+
+
+    // Highlight
+    gradient = coloursContext.createLinearGradient(0,0,colours.width,0);
+    gradient.addColorStop( 0.1, "rgba( 255, 255, 255, 0 )" );
+    gradient.addColorStop( 0.3, "rgba( 255, 255, 255, 0.25 )" );
+    gradient.addColorStop( 0.485, "rgba( 255, 255, 255, 0.6 )" );
+    gradient.addColorStop( 0.49, "rgba( 255, 255, 255, 0.8 )" );
+    gradient.addColorStop( 0.5, "rgba( 255, 255, 255, 0.6 )" );
+    gradient.addColorStop( 0.51, "rgba( 255, 255, 255, 0.8 )" );
+    gradient.addColorStop( 0.515, "rgba( 255, 255, 255, 0.6 )" );
+    gradient.addColorStop( 0.7, "rgba( 255, 255, 255, 0.25 )" );
+    gradient.addColorStop( 0.9, "rgba( 255, 255, 255, 0 )" );
+    coloursContext.fillStyle = gradient;
+    coloursContext.fillRect( 0, 0, colours.width, colours.height );
+
+
+    var WIDTH = canvas.width;
+    var HEIGHT = canvas.height;
+    var values = [];
+
+
+
+
+    var ctx = canvas.getContext("2d");
+
+
+
+
+    function loadSong(url) {
+
+        // Show loading graphic
+        if (audio) audio.remove();
+        if (sourceNode) sourceNode.disconnect();
+        cancelAnimationFrame(audioAnimation);
+
+        var a = document.createElement( 'audio' );
+        var canPlay = !!(a.canPlayType && a.canPlayType('audio/mpeg;').replace(/no/, ''));
+        console.log( canPlay );
+        if ( ! canPlay )
+        {
+            alert( "Doesn't support playback" );
+            return;
+        }
+
+        audio = new Audio();
+        audio.setAttribute( 'preload', 'auto' ); // See if this solves issue w/ stream never playing
+        audio.setAttribute( 'controls', 'controls' ); // Show playhead, etc
+        audio.addEventListener("canplay", function(e) {
+            // Hide loading graphic
+
+            // Does nothing in FF
+            setupAudioNodes();
+
+            // Works immediately in FF
+            // audio.play();
+
+        }, false);
+        audio.addEventListener("playing", function(e) {
+            console.log( "playing a duration of", audio.duration );
+        }, false);
+        audio.addEventListener("timeupdate", function(e) {
+            // console.log( "timeupdate" );
+        }, false);
+
+        var source = document.createElement( 'source' );
+        audio.appendChild( source );
+
+        source.setAttribute( 'type', 'audio/mpeg' );
+        source.setAttribute( 'src', url );
+        // audio.load();
+
+        // audio.src = url;
+        document.body.appendChild( audio );
+    }
+
+
+
+    function setupAudioNodes()
+    {
+        // console.log( analyser, context.createAnalyser() );
+        analyser = (analyser || context.createAnalyser());
+        // console.log( analyser, context );
+        analyser.smoothingTimeConstant = 0.7; // 5; // 0.8
+        analyser.fftSize = 512;
+
+        // If this is enabled, then Firefox will fail silently
+        // Reference: https://bugzilla.mozilla.org/show_bug.cgi?id=937718
+        //
+        if ( false )
+        {
+            sourceNode = context.createMediaElementSource(audio);
+            sourceNode.connect(analyser);
+
+            sourceNode.connect(context.destination);
+            // analyser.connect(context.destination);
+            // console.log( analyser, sourceNode );
+        }
+
+        audio.play();
+        drawSpectrum();
+    }
+
+    function drawSpectrum()
+    {
+        // console.log( 'drawSpectrum' );
+        var array =  new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteFrequencyData(array);
+
+        for ( var i = 0; i < (array.length); i++ )
+        {
+            values[ i ] = array[ i ] / 255;
+        }
+
+        render();
+
+        audioAnimation = requestAnimationFrame(drawSpectrum);
+    }
+
+    function render()
+    {
+        var h = Math.ceil( HEIGHT / values.length );
+        var w = Math.ceil( WIDTH / values.length );
+        var value;
+        var x, y, sy;
+
+        ctx.clearRect(0, 0, WIDTH, HEIGHT);
+        for ( var i = 0; i < (values.length); i++ )
+        {
+            value = values[i] * WIDTH;
+
+            x = ( WIDTH - value ) * 0.5;
+            y = HEIGHT - h * i;
+            sy = colours.height - Math.floor( i / values.length * colours.height );
+
+            ctx.drawImage( colours, 0, sy, colours.width, 1, x, y, value, h - 1 );
+        }
+    }
+
+    function renderOld()
+    {
+        var w = Math.ceil( WIDTH / values.length );
+        var value;
+
+        ctx.clearRect(0, 0, WIDTH, HEIGHT);
+        for ( var i = 0; i < (values.length); i++ )
+        {
+            value = values[i] * HEIGHT;
+            ctx.fillRect( i * w, HEIGHT - value, w, value );
+        }
+    }
+
+
+    function loadSC( url )
+    {
+        var scClientId = 'a20b2507998bc9f8f0874f12de0efb84';
+        var resolvedUrl = 'http://api.soundcloud.com/resolve.json?url=' + url + '&client_id=' + scClientId;
+
+        $.get( resolvedUrl, function( result )
+        {
+            // console.log( result );
+            if ( result.streamable )
+            {
+                document.getElementById( 'credits' ).style.display = 'inline-block';
+                document.getElementById( 'title' ).innerHTML = result.title;
+                document.getElementById( 'user' ).innerHTML = result.user.username;
+                document.getElementById( 'user' ).href = result.permalink_url;
+
+                var songUrl = result.stream_url + '?client_id=' + scClientId;
+                loadSong( songUrl );
+
+                // Update location for linking
+                if ( getParam() != url )
+                {
+                    var pos = ( window.location.href.indexOf( '?url=' ) == -1 ) ? window.location.href.length : window.location.href.indexOf( '?url=' ) ;
+                    var newURL = window.location.href.substr( 0, pos ) + '?url=' + encodeURIComponent( url );
+                    window.history.pushState( {}, "", newURL );
+                }
+
+                _gaq.push(['_trackPageview']);
+            }
+            else
+            {
+                alert( "Sorry, that link can't be streamed" );
+            }
+        });
+    }
+
+
+    function getParam()
+    {
+        if ( window.location.href.indexOf( '?url=' ) > -1 )
+        {
+            return window.location.href.substr( 0, window.location.href.indexOf( '?url=' ) + 5 );
+        }
+        else
+        {
+            return '';
+        }
+    }
+
+
+
+    // Grab an SC URL
+    $(document).ready(function(){
+
+        /*
+        console.log( window.location.hash );
+        if ( window.location.hash == '' )
+            alert( 'empty!' );
+
+        if ( window.location.href.indexOf( '#' ) == -1 )
+            alert( 'empty!' );
+        */
+
+
+        // /*
+        $('.song').click(function(e){
+            e.preventDefault();
+            var path = $(this).attr('href');
+
+            if ( path.indexOf( 'soundcloud' ) > -1 )
+            {
+                loadSC( path );
+            }
+            else
+            {
+                loadSong( path );
+            }
+        });
+
+        $('#loadSC').click( function(e){
+            var url = prompt( "Enter a SoundCloud URL" );
+
+            if ( ! url )
+            {
+                // alert( 'Sorry, invalid URL' );
+                return;
+            }
+
+            console.log( url );
+            loadSC( url );
+        });
+
+        $( window).resize( function(e) {
+            canvas.height = window.innerHeight;
+            canvas.width = window.innerWidth;
+
+            WIDTH = canvas.width;
+            HEIGHT = canvas.height;
+            // console.log( WIDTH, HEIGHT );
+        });
+
+        if ( getParam() != '' )
+        {
+            var url = decodeURIComponent( window.location.href.substr( window.location.href.indexOf( '?url=' ) + 5 ) );
+            loadSC( url );
+        }
+    });
+
+
+
+</script>
+</body>
+</html>
