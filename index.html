@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <!--
-    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
-    -->
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
     <meta charset=utf-8 />
     <title>Spectrum analyzer - Syncretinal</title>
@@ -19,7 +16,6 @@
 
         a {
             color: #fff;
-            /* text-decoration: none; */
         }
 
         ul {
@@ -36,22 +32,29 @@
         }
 
         #soundcloud {
-            /* background-color: #333; */
             display: inline-block;
-            padding: 1em;
+            /* padding: 1em; */
             color: #fff;
             font-size: 0.75em;
             position: absolute;
-            top: 0;
-            right: 0;
-            /* opacity: 0.5; */
-        }
+            bottom: 0;
+            /* right: 0; */
+            text-align: center;
+            width: 100%;
+            border: 0 solid red;
+            }
+
+            #soundcloud audio { /* display: inline-block; */ }
             #soundcloud #credits { display: none; }
-            #soundcloud img { float: right; padding-left: 0.5em; }
-            #soundcloud button { float: right; clear: both; margin: 0.5em 0 0 0; }
+            #soundcloud img { /* float: right; padding-left: 0.5em; */ }
+            #soundcloud button { /* float: right; clear: both; margin: 0.5em 0 0 0; */ margin-left: 2em; }
+            #soundcloud #songs { /* display: none; */ }
 
         canvas { position: absolute; z-index: -1; top: 0; left: 0; }
             canvas#colourTable { right: 0; /* */ display: none; }
+
+        div#drop-target { position: absolute; left: 30%; top: 40%; width: 40%; margin: 1em; padding: 4em 0; color: #fff; text-align: center; border: 1px dashed orange; opacity: 0.75; z-index: 5; }
+            div#drop-target.over { border-color: gold; opacity: 1; background-color: rgba( 255, 215, 0, 0.1 ); }
 
     </style>
 
@@ -71,54 +74,145 @@
     </script>
 </head>
 <body>
-<div id="soundcloud">
-    <img src="soundcloud_logo.png" />
-    <div id="credits"><span id="title">title</span> uploaded by <a id="user" href="#">user</a></div>
-    <button id="loadSC">Load new song</button>
-    <!--
-    <hr />
-    -->
-    <!--
-    <a href="#" onclick="playPause(); return false;">pause</a>
-    -->
-</div>
-<ul id="songs">
-    <!--
-    <li><a class="song" href="https://soundcloud.com/pilsg/kanye-west-runaway-feat-pusha-t-2">[NO STREAMING] Kanye - Runaway</a></li>
-    -->
-    <li><a class="song" href="ACDC_-_Back_In_Black-sample.ogg">AC/DC</a></li>
-    <li><a class="song" href="05%20-%20Autechre%20-%20Basscadet.mp3">Autechre</a></li>
 
-    <li><a class="song" href="https://soundcloud.com/thrilljockey/matmos-teen-paranormal-romance">Matmos</a></li>
-    <li><a class="song" href="https://soundcloud.com/kidlogic/souls-of-mischief-93-till">KidLogic</a></li>
-    <li><a class="song" href="https://soundcloud.com/sgayam2/09-runaway-ft-pusha-t">Kanye</a></li>
-    <li><a class="song" href="https://soundcloud.com/dragonflyenergydrinks/pursuit-of-happiness-kid-cudi">Kid Cudi</a></li>
-</ul>
+<div id="soundcloud">
+    <p>
+        <p id="credits">
+            <span id="title">title</span> uploaded by <a id="user" href="#">user</a>
+        </p>
+    </p>
+
+    <audio controls>
+        <source type="audio/mpeg" />
+    </audio>
+</div>
+
+<div id="drop-target">
+    <p>Drag 'n drop an MP3 or SoundCloud URL here</p>
+
+    <button id="loadSC">Load new song</button>
+    <img src="soundcloud_logo.png" />
+
+    <ul id="songs">
+        <!--
+        <li><a class="song" href="https://soundcloud.com/pilsg/kanye-west-runaway-feat-pusha-t-2">[NO STREAMING] Kanye - Runaway</a></li>
+        -->
+        <li><a class="song" href="ACDC_-_Back_In_Black-sample.ogg">AC/DC</a></li>
+        <li><a class="song" href="05%20-%20Autechre%20-%20Basscadet.mp3">Autechre</a></li>
+
+        <li><a class="song" href="https://soundcloud.com/thrilljockey/matmos-teen-paranormal-romance">Matmos</a></li>
+        <li><a class="song" href="https://soundcloud.com/kidlogic/souls-of-mischief-93-till">KidLogic</a></li>
+        <li><a class="song" href="https://soundcloud.com/sgayam2/09-runaway-ft-pusha-t">Kanye</a></li>
+        <li><a class="song" href="https://soundcloud.com/dragonflyenergydrinks/pursuit-of-happiness-kid-cudi">Kid Cudi</a></li>
+    </ul>
+</div>
+
 <canvas id="songcanvas" width="1000" height="325"></canvas>
 <canvas id="colourTable" width="512" height="256"></canvas>
-<script>
 
-    /*
-    function playPause()
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript">
+
+    var dropTarget = document.getElementById( 'drop-target' );
+    dropTarget.addEventListener( 'drop', drop, false );
+    dropTarget.addEventListener( 'dragenter', dragHandler, false );
+    dropTarget.addEventListener( 'dragover', dragHandler, false );
+    dropTarget.addEventListener( 'dragleave', dragHandler, false );
+
+    function drop( e )
     {
-        if ( audio.paused )
+        e.stopPropagation();
+        e.preventDefault();
+
+
+        var data = e.dataTransfer || e.originalEvent.dataTransfer;
+
+        // alert( e );
+
+        console.log( data, data.items[0].type );
+
+
+        if ( data.files.length == 1 )
         {
-            audio.play();
+            var url = data.files[0].name;
+            if ( url.substring( url.length - 3 ) == 'mp3' )
+            {
+                loadSong(url);
+            }
         }
         else
         {
-            audio.pause();
+            data.items[0].getAsString( loadSC );
         }
-    }
-    */
 
-    window.audioContext = AudioContext || webkitAudioContext ;
-    var context = new audioContext();
+        console.log( data.files );
+
+        $('#drop-target').hide();
+
+        return false;
+
+
+        /*
+        var imageUrl = e.dataTransfer.getData('text/html');
+        console.log( imageUrl );
+
+        if($(imageUrl).children().length > 0 ){
+            var url = $(imageUrl).find('img').attr('src');
+        }else{
+            var url = $(imageUrl).attr('src');
+        }
+        // console.log(url);
+        console.log( url );
+        */
+    }
+
+    function dragHandler( e )
+    {
+        if ( e.type == 'dragover' )
+        {
+            e.stopPropagation();
+            e.preventDefault();
+        }
+        else if ( e.type == 'dragenter' )
+        {
+            $('#drop-target').addClass( 'over' );
+        }
+        else if ( e.type == 'dragleave' )
+        {
+            $('#drop-target').removeClass( 'over' );
+        }
+
+        return false;
+    }
+
+
+    var context;
     var audioAnimation;
     var audioBuffer;
     var sourceNode;
     var analyser;
     var audio;
+
+    if ( typeof AudioContext !== "undefined" || typeof webkitAudioContext !== "undefined" )
+    {
+        window.audioContext = AudioContext || webkitAudioContext ;
+        context = new audioContext();
+    }
+    else
+    {
+        alert( 'Sorry, your browser does not support AudioContext' );
+    }
+
+
     // get the context from the canvas to draw on
     var canvas = document.getElementById('songcanvas');
     canvas.width = window.innerWidth;
@@ -138,7 +232,7 @@
     coloursContext.fillRect( 0, 0, colours.width, colours.height );
 
 
-    // /* Noise
+    // Add noise
     var offsetX = colours.width * 0.075;
     var x,y;
     for ( var i = 0; i < 2500; i++ )
@@ -150,7 +244,6 @@
         coloursContext.fillRect( x  + offsetX, y, 1, 1 );
         coloursContext.fill();
     }
-    // */
 
 
     // Highlight
@@ -183,11 +276,20 @@
     function loadSong(url) {
 
         // Show loading graphic
-        if (audio) audio.remove();
+
+
+        // Can I remove an HTML element?
+        // if (audio) audio.remove();
+
+
         if (sourceNode) sourceNode.disconnect();
         cancelAnimationFrame(audioAnimation);
 
-        var a = document.createElement( 'audio' );
+
+        audio = document.getElementsByTagName('audio')[0];
+        a = audio;
+        // var a = document.createElement( 'audio' );
+        a = document.getElementsByTagName('audio')[0];
         var canPlay = !!(a.canPlayType && a.canPlayType('audio/mpeg;').replace(/no/, ''));
         console.log( canPlay );
         if ( ! canPlay )
@@ -196,9 +298,11 @@
             return;
         }
 
-        audio = new Audio();
+
+        // audio = new Audio();
+        // audio = document.getElementsByTagName('audio')[0];
         audio.setAttribute( 'preload', 'auto' ); // See if this solves issue w/ stream never playing
-        audio.setAttribute( 'controls', 'controls' ); // Show playhead, etc
+        // audio.setAttribute( 'controls', 'controls' ); // Show playhead, etc
         audio.addEventListener("canplay", function(e) {
             // Hide loading graphic
 
@@ -210,21 +314,33 @@
 
         }, false);
         audio.addEventListener("playing", function(e) {
-            console.log( "playing a duration of", audio.duration );
+            console.log( "Playing a duration of", audio.duration );
         }, false);
         audio.addEventListener("timeupdate", function(e) {
             // console.log( "timeupdate" );
         }, false);
+        audio.addEventListener("pause", function(e) {
+            $('#drop-target').removeClass('over');
+            $('#drop-target').show();
+        }, false);
+        audio.addEventListener("play", function(e) {
+            $('#drop-target').removeClass('over');
+            $('#drop-target').hide();
+        }, false);
 
+
+        /*
         var source = document.createElement( 'source' );
         audio.appendChild( source );
 
         source.setAttribute( 'type', 'audio/mpeg' );
         source.setAttribute( 'src', url );
         // audio.load();
+        */
+        audio.src = url;
 
         // audio.src = url;
-        document.body.appendChild( audio );
+        // document.body.appendChild( audio );
     }
 
 
@@ -233,18 +349,20 @@
     {
         // console.log( analyser, context.createAnalyser() );
         analyser = (analyser || context.createAnalyser());
-        // console.log( analyser, context );
-        analyser.smoothingTimeConstant = 0.7; // 5; // 0.8
+        analyser.smoothingTimeConstant = 0.7;
         analyser.fftSize = 512;
+
+        console.log(audio);
 
         // If this is enabled, then Firefox will fail silently
         // Reference: https://bugzilla.mozilla.org/show_bug.cgi?id=937718
         //
-        if ( false )
-        {
-            sourceNode = context.createMediaElementSource(audio);
-            sourceNode.connect(analyser);
+        // Triggers error in Chrome when seeking position via media UI
+        sourceNode = (sourceNode || context.createMediaElementSource(audio));
 
+        if ( true )
+        {
+            sourceNode.connect(analyser);
             sourceNode.connect(context.destination);
             // analyser.connect(context.destination);
             // console.log( analyser, sourceNode );
@@ -276,8 +394,16 @@
         var w = Math.ceil( WIDTH / values.length );
         var value;
         var x, y, sy;
+        // console.log( h );
 
         ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+        /*
+        ctx.fillStyle = "rgba( 255,0,0,0.1 )";
+        ctx.rect(0, 0, WIDTH, HEIGHT);
+        ctx.fill();
+        */
+
         for ( var i = 0; i < (values.length); i++ )
         {
             value = values[i] * WIDTH;
@@ -290,56 +416,60 @@
         }
     }
 
-    function renderOld()
-    {
-        var w = Math.ceil( WIDTH / values.length );
-        var value;
-
-        ctx.clearRect(0, 0, WIDTH, HEIGHT);
-        for ( var i = 0; i < (values.length); i++ )
-        {
-            value = values[i] * HEIGHT;
-            ctx.fillRect( i * w, HEIGHT - value, w, value );
-        }
-    }
-
-
+    // Resolve SC stream from URL
     function loadSC( url )
     {
         var scClientId = 'a20b2507998bc9f8f0874f12de0efb84';
         var resolvedUrl = 'http://api.soundcloud.com/resolve.json?url=' + url + '&client_id=' + scClientId;
 
-        $.get( resolvedUrl, function( result )
-        {
-            // console.log( result );
-            if ( result.streamable )
+        $.ajax({
+            url: resolvedUrl,
+            type: 'GET',
+            success: function( result )
             {
-                document.getElementById( 'credits' ).style.display = 'inline-block';
-                document.getElementById( 'title' ).innerHTML = result.title;
-                document.getElementById( 'user' ).innerHTML = result.user.username;
-                document.getElementById( 'user' ).href = result.permalink_url;
+                console.log( result );
 
-                var songUrl = result.stream_url + '?client_id=' + scClientId;
-                loadSong( songUrl );
-
-                // Update location for linking
-                if ( getParam() != url )
+                // We can use this as a visualization fallback for FF due to CORS annoyance..
+                if ( 'firefox' == 'true' )
                 {
-                    var pos = ( window.location.href.indexOf( '?url=' ) == -1 ) ? window.location.href.length : window.location.href.indexOf( '?url=' ) ;
-                    var newURL = window.location.href.substr( 0, pos ) + '?url=' + encodeURIComponent( url );
-                    window.history.pushState( {}, "", newURL );
+                    var waveform = new Image();
+                    waveform.src = result.waveform_url;
+                    document.body.appendChild( waveform );
                 }
 
-                _gaq.push(['_trackPageview']);
-            }
-            else
-            {
-                alert( "Sorry, that link can't be streamed" );
+                if ( result.streamable )
+                {
+                    document.getElementById( 'credits' ).style.display = 'block';
+                    document.getElementById( 'title' ).innerHTML = result.title;
+                    document.getElementById( 'user' ).innerHTML = result.user.username;
+                    document.getElementById( 'user' ).href = result.permalink_url;
+
+                    var songUrl = result.stream_url + '?client_id=' + scClientId;
+                    loadSong( songUrl );
+
+                    // Update location for linking
+                    if ( getParam() != url )
+                    {
+                        var pos = ( window.location.href.indexOf( '?url=' ) == -1 ) ? window.location.href.length : window.location.href.indexOf( '?url=' ) ;
+                        var newURL = window.location.href.substr( 0, pos ) + '?url=' + encodeURIComponent( url );
+                        window.history.pushState( {}, "", newURL );
+                    }
+
+                    _gaq.push(['_trackPageview']);
+                }
+                else
+                {
+                    alert( "Sorry, that link can't be streamed" );
+                }
+            },
+            error: function( data ) {
+                alert( "Sorry, that link couldn't be streamed.." );
             }
         });
     }
 
 
+    // Check for URL in params
     function getParam()
     {
         if ( window.location.href.indexOf( '?url=' ) > -1 )
@@ -395,14 +525,7 @@
             loadSC( url );
         });
 
-        $( window).resize( function(e) {
-            canvas.height = window.innerHeight;
-            canvas.width = window.innerWidth;
-
-            WIDTH = canvas.width;
-            HEIGHT = canvas.height;
-            // console.log( WIDTH, HEIGHT );
-        });
+        $( window ).resize( resize );
 
         if ( getParam() != '' )
         {
@@ -410,6 +533,19 @@
             loadSC( url );
         }
     });
+
+function resize(e)
+{
+    canvas.setAttribute( 'height', window.innerHeight );
+    canvas.setAttribute( 'width', window.innerWidth );
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+
+    WIDTH = window.innerWidth;
+    HEIGHT = window.innerHeight;
+
+    // console.log( WIDTH, HEIGHT );
+}
 
 
 
