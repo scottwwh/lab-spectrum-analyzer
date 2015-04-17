@@ -1,4 +1,5 @@
 
+
 body {
     font-family: sans-serif;
     padding: 0;
@@ -23,28 +24,33 @@ li {
     display: inline;
 }
 
-#soundcloud {
-    display: inline-block;
-    /* padding: 1em; */
-    color: #fff;
-    font-size: 0.75em;
+nav {
     position: absolute;
     bottom: 0;
-    /* right: 0; */
-    text-align: center;
     width: 100%;
-    border: 0 solid red;
+    margin-bottom: 1em;
+    text-align: center;
 }
+    nav audio { padding-top: 1em; }
 
-#soundcloud audio { /* display: inline-block; */ }
-#soundcloud #credits { display: none; }
-#soundcloud img { /* float: right; padding-left: 0.5em; */ }
-#soundcloud button { /* float: right; clear: both; margin: 0.5em 0 0 0; */ margin-left: 2em; }
-#soundcloud #songs { /* display: none; */ }
+.nav { transition: opacity 0.5s; }
+    .nav.hide { opacity: 0; }
+
+
+
+/* #credits { display: none; } */
 
 canvas { position: absolute; z-index: -1; top: 0; left: 0; }
-canvas#colourTable { right: 0; /* */ display: none; }
+canvas#colourTable { right: 0; display: none; }
 
-div#drop-target { position: absolute; left: 30%; top: 40%; width: 40%; margin: 1em; padding: 4em 0; color: #fff; text-align: center; border: 1px dashed orange; opacity: 0.75; z-index: 5; }
-div#drop-target.over { border-color: gold; opacity: 1; background-color: rgba( 255, 215, 0, 0.1 ); }
+div#drop-target {
+    position: absolute; top: 50%; left: 50%; width: 40%; min-width: 15em; transform: translate(-50%,-50%); margin: 0; padding: 2em; color: #fff;
+    text-align: center;
+    background-color: rgba(25,25,25,0.5);
+    z-index: 5;
+    border: 5px solid transparent;
+    border-radius: 0.5em;
+}
 
+div#drop-target.over { border-color: gold; }
+div#drop-target.over > * { pointer-events: none; }

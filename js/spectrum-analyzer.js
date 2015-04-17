@@ -1,11 +1,5 @@
 
 
-
-var lab; // Defined in containing page until we've encapsulated all of this
-
-
-
-// Not currently working
 var DropTarget = function()
 {
     this.dropTarget;
@@ -17,7 +11,7 @@ var DropTarget = function()
         this.dropTarget.addEventListener( 'drop', this.drop, false );
         this.dropTarget.addEventListener( 'dragenter', this.dragHandler, false );
         this.dropTarget.addEventListener( 'dragover', this.dragHandler, false );
-        this.dropTarget.addEventListener( 'dragleave', this.dragHandler, false );
+        this.dropTarget.addEventListener( 'dragleave', this.dragHandler.bind(this), false );
     };
 
     this.drop = function( e )
@@ -25,48 +19,34 @@ var DropTarget = function()
         e.stopPropagation();
         e.preventDefault();
 
+        lab.updateNote('Loading...');
 
         var data = e.dataTransfer || e.originalEvent.dataTransfer;
-
-        // alert( e );
-        console.log( data, data.items[0].type );
-
-
-        if ( data.files.length == 1 )
+        if ( data.files.length > 0
+                && data.files[0].name.indexOf( '.mp3' ) > -1
+                )
         {
-            var url = data.files[0].name;
-            if ( url.substring( url.length - 3 ) == 'mp3' )
-            {
-                // loadSong(url);
-
-                var reader = new FileReader();
-
-                reader.onload = function(fileEvent) {
-                    var data = fileEvent.target.result;
-                    // initAudio(data);
-                    // console.log(data);
-                    console.log(fileEvent.target);
-                    loadSong(data);
-                };
-
-                console.log(data.files);
-                reader.readAsArrayBuffer(data.files[0]);
-
-            }
+            // Ref: http://stackoverflow.com/questions/10413548/javascript-filereader-using-a-lot-of-memory
+            var url = window.URL || window.webkitURL;
+            var src = url.createObjectURL( data.files[0] );
+            lab.updateNote( data.files[0].name )
+            lab.loadSong( src );
+        }
+        else if ( data.getData("URL").indexOf('soundcloud.com') > -1 )
+        {
+            lab.loadSongFromSC( data.getData("URL") );
         }
         else
         {
-            data.items[0].getAsString( loadSongFromSC );
+            lab.updateNote( "Sorry, that didn't work - try something else." )
         }
 
-        // console.log( data.files );
-
-        $('#drop-target').hide();
+        e.currentTarget.classList.remove( 'over' );
 
         return false;
     };
 
-    this.dragHandler = function( e )
+    this.dragHandler = function(e)
     {
         if ( e.type == 'dragover' )
         {
@@ -81,226 +61,26 @@ var DropTarget = function()
         {
             $('#drop-target').removeClass( 'over' );
         }
-
-        return false;
     };
 };
 
-
-
-
-
-
-
-
-var audio;
-var audioContext;
-var audioAnimation;
-// var audioBuffer;
-var sourceNode;
-var analyser;
-
-if ( typeof AudioContext !== "undefined" || typeof webkitAudioContext !== "undefined" )
-{
-    window.audioContext = AudioContext || webkitAudioContext ;
-    audioContext = new audioContext();
-}
-else
-{
-    alert( 'Sorry, your browser does not support AudioContext' );
-}
-
-
-
-
-
-var isInitialized = false;
-
-function initAudio()
-{
-    audio = document.getElementsByTagName('audio')[0];
-
-    var canPlay = !! ( audio.canPlayType && audio.canPlayType('audio/mpeg;').replace(/no/, ''));
-    if ( ! canPlay )
-    {
-        alert( "Doesn't support playback" );
-        return;
-    }
-
-
-    audio.setAttribute( 'preload', 'auto' ); // See if this solves issue w/ stream never playing
-    // audio.removeAttribute( 'controls' );
-
-    audio.addEventListener("canplay", function(e) {
-        // Hide loading graphic
-
-        // Does nothing in FF
-        setupAudioNodes();
-
-        // Works immediately in FF
-        // audio.play();
-
-    }, false);
-    audio.addEventListener("playing", function(e) {
-        console.log( "Playing a duration of", audio.duration );
-    }, false);
-    audio.addEventListener("timeupdate", function(e) {
-        // console.log( "timeupdate" );
-    }, false);
-    audio.addEventListener("pause", function(e) {
-        $('#drop-target').removeClass('over');
-        $('#drop-target').show();
-    }, false);
-    audio.addEventListener("play", function(e) {
-        $('#drop-target').removeClass('over');
-        $('#drop-target').hide();
-    }, false);
-}
-
-
-
-
-function loadSong(url)
-{
-    if ( ! isInitialized )
-    {
-        // Show loading graphic
-
-
-        // Can I remove an HTML element?
-        // if (audio) audio.remove();
-
-
-        if (sourceNode) sourceNode.disconnect();
-        cancelAnimationFrame(audioAnimation);
-
-        initAudio();
-
-        isInitialized = true;
-    }
-
-
-    audio.src = url;
-}
-
-
-
-
-function setupAudioNodes()
-{
-    // console.log( analyser, audioContext.createAnalyser() );
-    analyser = (analyser || audioContext.createAnalyser());
-    analyser.smoothingTimeConstant = 0.25; // 0.7;
-    analyser.fftSize = lab.fftSize;
-
-    // console.log(audio);
-
-    // If this is enabled, then Firefox will fail silently
-    // Reference: https://bugzilla.mozilla.org/show_bug.cgi?id=937718
-    //
-    // Triggers error in Chrome when seeking position via media UI
-    sourceNode = (sourceNode || audioContext.createMediaElementSource(audio));
-
-    if ( true )
-    {
-        sourceNode.connect(analyser);
-        sourceNode.connect(audioContext.destination);
-        // analyser.connect(audioContext.destination);
-        // console.log( analyser, sourceNode );
-    }
-
-    audio.play();
-    update();
-}
-
-
-
-function update()
-{
-    // console.log( 'update' );
-    var array =  new Uint8Array(analyser.frequencyBinCount);
-    analyser.getByteFrequencyData(array);
-    // console.log(array.length);
-
-    // Normalize values
-    for ( var i = 0; i < (array.length); i++ )
-    {
-        values[ i ] = array[ i ] / 255;
-    }
-
-    lab.renderer.render();
-
-    audioAnimation = requestAnimationFrame(update);
-}
-
-
-
-
-
-
-
-/** SoundCloud wrapper **/
-
-// Resolve SC stream from URL
-function loadSongFromSC( url )
-{
-    var scClientId = 'a20b2507998bc9f8f0874f12de0efb84';
-    var resolvedUrl = 'http://api.soundcloud.com/resolve.json?url=' + url + '&client_id=' + scClientId;
-
-    // console.log(url);
-
-    $.ajax({
-        url: resolvedUrl,
-        type: 'GET',
-        success: function( result )
-        {
-            console.log( result );
-
-            // We can use this as a visualization fallback for FF due to CORS annoyance..
-            if ( 'firefox' == 'true' )
-            {
-                var waveform = new Image();
-                waveform.src = result.waveform_url;
-                document.body.appendChild( waveform );
-            }
-
-            if ( result.streamable )
-            {
-                document.getElementById( 'credits' ).style.display = 'block';
-                document.getElementById( 'title' ).innerHTML = result.title;
-                document.getElementById( 'user' ).innerHTML = result.user.username;
-                document.getElementById( 'user' ).href = result.permalink_url;
-
-                var songUrl = result.stream_url + '?client_id=' + scClientId;
-                loadSong( songUrl );
-
-                // Update location for linking
-                lab.setURL( url );
-
-                _gaq.push(['_trackPageview']);
-            }
-            else
-            {
-                alert( "Sorry, that link can't be streamed" );
-            }
-        },
-        error: function( data ) {
-            alert( "Sorry, that link couldn't be streamed.." );
-        }
-    });
-}
-
-
-
-
-
+var drop = new DropTarget();
+drop.init();
 
 
 
 var SpectrumAnalyzer = function()
 {
+    this.audio;
+    this.audioContext;
+    this.audioAnimation;
+    this.sourceNode;
+    this.analyser;
+
+    this.supportsWebAudio = false;
     this.fftSize = 256;
     this.renderer = null;
+    this.timeout = null;
 
 
     // Initialize - and grab an SC URL?
@@ -311,17 +91,98 @@ var SpectrumAnalyzer = function()
         for ( var i = 0; i < els.length; i++ )
             els[i].addEventListener( 'click', this.loadDefaultSong.bind( this ) );
 
+        this.initAudio();
+
+        if ( ! this.supportsWebAudio )
+            document.querySelector('p.compatibility').innerHTML = "(Note, your browser does not support WebAudio)";
+
+        this.renderer.init();
 
         // Check for URL to load
         var url = this.getURL();
         if ( url != null )
         {
-            loadSongFromSC( url );
+            this.loadSongFromSC( url );
         }
 
-        this.renderer.init();
+        this.hideNav();
 
+        window.addEventListener( 'mousemove', this.mouseHandler.bind(this) );
         window.addEventListener( 'resize', this.resize.bind(this) );
+    };
+
+    this.initAudio = function()
+    {
+        if ( typeof AudioContext !== "undefined" || typeof webkitAudioContext !== "undefined" )
+        {
+            this.audioContext = ( AudioContext ) ? new AudioContext() : new webkitAudioContext() ;
+            this.supportsWebAudio = true;
+        }
+
+        this.audio = document.getElementsByTagName('audio')[0];
+        this.audio.setAttribute( 'crossOrigin', 'anonymous' );
+        this.audio.setAttribute( 'preload', 'auto' );
+
+        // Older versions of FF?
+        var canPlay = !! ( this.audio.canPlayType && this.audio.canPlayType('audio/mpeg;').replace(/no/, ''));
+        if ( ! canPlay )
+        {
+            alert( "Doesn't support playback" );
+            return;
+        }
+
+
+        this.audio.addEventListener("canplay", function(e) {
+            // Hide loading graphic
+
+            // Does nothing in FF
+            if ( this.supportsWebAudio )
+            {
+                this.setupAudioNodes();
+            }
+            else
+            {
+                this.audio.play();
+            }
+
+        }.bind(this), false);
+        this.audio.addEventListener("playing", function(e) {
+            // console.log( "Playing a duration of", this.audio.duration );
+        }, false);
+        this.audio.addEventListener("timeupdate", function(e) {
+            // console.log( "timeupdate" );
+        }, false);
+        this.audio.addEventListener("pause", function(e) {
+            // $('#drop-target').removeClass('over');
+            // $('#drop-target').show();
+        }, false);
+        this.audio.addEventListener("play", function(e) {
+            // $('#drop-target').removeClass('over');
+            // $('#drop-target').hide();
+        }, false);
+    };
+
+
+
+    this.mouseHandler = function(e)
+    {
+        var els = document.querySelectorAll('.nav');
+        for ( var i = 0; i < els.length; i++ )
+            els[i].classList.remove('hide');
+
+        this.hideNav();
+    };
+
+    this.hideNav = function()
+    {
+        if ( this.timeout )
+            clearTimeout( this.timeout );
+
+        this.timeout = setTimeout( function(e) {
+            var els = document.querySelectorAll('.nav');
+            for ( var i = 0; i < els.length; i++ )
+                els[i].classList.add('hide');
+        }, 5000 );
     };
 
     this.loadDefaultSong = function(e)
@@ -331,13 +192,115 @@ var SpectrumAnalyzer = function()
         var path = e.currentTarget.getAttribute('href');
         if ( path.indexOf( 'soundcloud' ) > -1 )
         {
-            loadSongFromSC( path );
+            this.loadSongFromSC( path );
         }
         else
         {
-            loadSong( path );
+            this.loadSong( path );
         }
     };
+
+
+
+    this.setupAudioNodes = function()
+    {
+        this.analyser = (this.analyser || this.audioContext.createAnalyser());
+        this.analyser.smoothingTimeConstant = 0.25; // 0.7;
+        this.analyser.fftSize = this.fftSize;
+
+        // Firefox used to fail silently at this point
+        // Ref: https://bugzilla.mozilla.org/show_bug.cgi?id=937718
+        //
+        // Triggers error in Chrome when seeking position via media UI
+        this.sourceNode = (this.sourceNode || this.audioContext.createMediaElementSource(this.audio));
+        this.sourceNode.connect(this.analyser);
+        this.sourceNode.connect(this.audioContext.destination);
+
+        this.audio.play();
+
+        this.update();
+    };
+
+
+
+    this.update = function()
+    {
+        var array =  new Uint8Array(this.analyser.frequencyBinCount);
+        this.analyser.getByteFrequencyData(array);
+
+        // Normalize values to 0-1
+        var values = [];
+        for ( var i = 0; i < (array.length); i++ )
+        {
+            values[ i ] = array[ i ] / 255;
+        }
+
+        this.renderer.render( values );
+
+        this.audioAnimation = requestAnimationFrame( this.update.bind(this) );
+    };
+
+    this.updateNote = function( str )
+    {
+        document.querySelector('p.note').innerHTML = str;
+    };
+
+
+
+    this.loadSong = function(url)
+    {
+        if (this.sourceNode) this.sourceNode.disconnect();
+
+        cancelAnimationFrame( this.audioAnimation );
+
+        this.audio.src = url;
+    };
+
+    // Resolve SC stream from URL
+    this.loadSongFromSC = function( url )
+    {
+        var scClientId = 'a20b2507998bc9f8f0874f12de0efb84';
+        var resolvedUrl = 'http://api.soundcloud.com/resolve.json?url=' + url + '&client_id=' + scClientId;
+
+        this.updateNote('Loading...');
+
+        $.ajax({
+            url: resolvedUrl,
+            type: 'GET',
+            success: function( result )
+            {
+                // console.log( result );
+                if ( result.streamable )
+                {
+                    var a = document.createElement('a');
+                    a.appendChild( document.createTextNode( result.title ) );
+                    a.setAttribute( 'href', result.permalink_url );
+
+                    var el = document.querySelector('p.note');
+                    if ( el.childNodes.length > 0 )
+                        el.removeChild( el.childNodes[0] );
+
+                    el.appendChild( a );
+
+                    var songUrl = result.stream_url + '?client_id=' + scClientId;
+                    this.loadSong( songUrl );
+
+                    // Update location for linking
+                    this.setURL( url );
+
+                    _gaq.push(['_trackPageview']);
+                }
+                else
+                {
+                    alert( "Sorry, that link can't be streamed" );
+                }
+            }.bind(this),
+            error: function( data ) {
+                alert( "Sorry, that link couldn't be streamed.." );
+            }
+        });
+    };
+
 
 
 
@@ -370,22 +333,8 @@ var SpectrumAnalyzer = function()
         // Need to support updates when state changes
         window.history.pushState( {}, "", location );
     }
-
 };
 
-
-
-
-
-// List of normalized values
-var values = [];
-
-
-
-
-
-
-/** Rendering **/
 
 var CanvasRenderer = function()
 {
@@ -443,7 +392,7 @@ var CanvasRenderer = function()
         coloursContext.fillRect( 0, 0, colours.width, colours.height );
     };
 
-    this.render = function()
+    this.render = function( values )
     {
         var h = canvas.height / values.length;
         var w = canvas.width / colours.width;

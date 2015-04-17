@@ -21,23 +21,19 @@
 </head>
 <body>
 
-<div id="soundcloud">
-    <p id="credits"><span id="title">title</span> uploaded by <a id="user" href="#">user</a></p>
-
+<nav class="nav">
     <audio controls>
         <source type="audio/mpeg" />
     </audio>
-</div>
+</nav>
 
-<div id="drop-target">
-    <p>Drag 'n drop an MP3 or SoundCloud URL here</p>
-
-    <img src="images/soundcloud_logo.png" />
+<div id="drop-target" class="nav">
+    <p class="note">Drag and drop an MP3 or SoundCloud URL here.</p>
+    <p class="credits"></p>
+    <p class="compatibility"></p>
 
     <ul id="songs">
-        <li><a class="song" href="music/ACDC_-_Back_In_Black-sample.ogg">AC/DC</a></li>
-        <li><a class="song" href="music/05%20-%20Autechre%20-%20Basscadet.mp3">Autechre</a></li>
-
+        <li>Try these:</li>
         <li><a class="song" href="https://soundcloud.com/thrilljockey/matmos-teen-paranormal-romance">Matmos</a></li>
         <li><a class="song" href="https://soundcloud.com/kidlogic/souls-of-mischief-93-till">KidLogic</a></li>
         <li><a class="song" href="https://soundcloud.com/sgayam2/09-runaway-ft-pusha-t">Kanye</a></li>
@@ -52,7 +48,7 @@
 <script type="text/javascript" src="js/spectrum-analyzer.js"></script>
 <script type="text/javascript">
 
-    lab = new SpectrumAnalyzer();
+    var lab = new SpectrumAnalyzer();
     lab.renderer = new CanvasRenderer();
     lab.init();
 
