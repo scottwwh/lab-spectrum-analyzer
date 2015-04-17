@@ -1,0 +1,50 @@
+
+body {
+    font-family: sans-serif;
+    padding: 0;
+    margin: 0;
+    background-color: #000;
+}
+
+a {
+    color: #fff;
+}
+
+ul {
+    font-size: 0.75em;
+    margin: 1em;
+    padding: 0;
+}
+
+li {
+    margin: 0 0.5em 0 0;
+    padding: 0;
+    list-style-type: none;
+    display: inline;
+}
+
+#soundcloud {
+    display: inline-block;
+    /* padding: 1em; */
+    color: #fff;
+    font-size: 0.75em;
+    position: absolute;
+    bottom: 0;
+    /* right: 0; */
+    text-align: center;
+    width: 100%;
+    border: 0 solid red;
+}
+
+#soundcloud audio { /* display: inline-block; */ }
+#soundcloud #credits { display: none; }
+#soundcloud img { /* float: right; padding-left: 0.5em; */ }
+#soundcloud button { /* float: right; clear: both; margin: 0.5em 0 0 0; */ margin-left: 2em; }
+#soundcloud #songs { /* display: none; */ }
+
+canvas { position: absolute; z-index: -1; top: 0; left: 0; }
+canvas#colourTable { right: 0; /* */ display: none; }
+
+div#drop-target { position: absolute; left: 30%; top: 40%; width: 40%; margin: 1em; padding: 4em 0; color: #fff; text-align: center; border: 1px dashed orange; opacity: 0.75; z-index: 5; }
+div#drop-target.over { border-color: gold; opacity: 1; background-color: rgba( 255, 215, 0, 0.1 ); }
+
