@@ -94,7 +94,7 @@ var SpectrumAnalyzer = function()
         this.initAudio();
 
         if ( ! this.supportsWebAudio )
-            document.querySelector('p.compatibility').innerHTML = "(Note, your browser does not support WebAudio)";
+            document.querySelector('p.compatibility').innerHTML = "(Your browser does not support WebAudio)";
 
         this.renderer.init();
 
@@ -146,23 +146,41 @@ var SpectrumAnalyzer = function()
             }
 
         }.bind(this), false);
-        this.audio.addEventListener("playing", function(e) {
-            // console.log( "Playing a duration of", this.audio.duration );
-        }, false);
-        this.audio.addEventListener("timeupdate", function(e) {
-            // console.log( "timeupdate" );
-        }, false);
-        this.audio.addEventListener("pause", function(e) {
-            // $('#drop-target').removeClass('over');
-            // $('#drop-target').show();
-        }, false);
-        this.audio.addEventListener("play", function(e) {
-            // $('#drop-target').removeClass('over');
-            // $('#drop-target').hide();
-        }, false);
+
+        this.audio.addEventListener("playing", this.audioHandler.bind(this), false );
+        this.audio.addEventListener("timeupdate", this.audioHandler.bind(this), false );
+        this.audio.addEventListener("pause", this.audioHandler.bind(this), false );
+        this.audio.addEventListener("play", this.audioHandler.bind(this), false );
+
+        // Debug
+        this.audio.addEventListener("seeked", this.audioHandler.bind(this), false ); // Occasionally not firing in Chrome
+        // this.audio.addEventListener("seeking", this.audioHandler.bind(this), false );
+        // this.audio.addEventListener("emptied", this.audioHandler.bind(this), false );
+        // this.audio.addEventListener("abort", this.audioHandler.bind(this), false );
+        // this.audio.addEventListener("ended", this.audioHandler.bind(this), false );
     };
 
+    this.audioHandler = function(e)
+    {
+        return;
+        console.log(e.type);
+        if (e.type == 'playing')
+        {
+            console.log( "Playing a duration of", this.audio.duration );
+        }
+        else if (e.type == 'timeupdate')
+        {
 
+        }
+        else if (e.type == 'pause')
+        {
+
+        }
+        else if (e.type == 'play')
+        {
+            console.log(this.audio);
+        }
+    };
 
     this.mouseHandler = function(e)
     {
@@ -225,6 +243,8 @@ var SpectrumAnalyzer = function()
 
     this.update = function()
     {
+        // console.log('update');
+
         var array =  new Uint8Array(this.analyser.frequencyBinCount);
         this.analyser.getByteFrequencyData(array);
 
@@ -338,19 +358,16 @@ var SpectrumAnalyzer = function()
 
 var CanvasRenderer = function()
 {
+    WIDTH = window.innerWidth;
+    HEIGHT = window.innerHeight;
+
     var canvas = document.getElementById('songcanvas');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width = WIDTH;
+    canvas.height = HEIGHT;
 
-    WIDTH = canvas.width;
-    HEIGHT = canvas.height;
     var canvasContext = canvas.getContext("2d");
-
-
     var colours = document.getElementById('colourTable');
     var coloursContext = colours.getContext("2d");
-
-
 
 
     // Loop keeps playing even when no sound
@@ -398,25 +415,15 @@ var CanvasRenderer = function()
         var w = canvas.width / colours.width;
         var value;
         var x, y, sy;
-        // console.log( h, w );
 
         canvasContext.clearRect(0, 0, WIDTH, HEIGHT);
-
-        /*
-         // Not a very interesting effect, could be better to play around with the form's boundary?
-         canvasContext.fillStyle = "rgba( 0,0,0,0.2 )";
-         canvasContext.rect(0, 0, WIDTH, HEIGHT);
-         canvasContext.fill();
-         */
-
-        for ( var i = 0; i < ( values.length ); i++ )
+        for ( var i = 0, len = values.length; i < len; i++ )
         {
             value = values[i] * canvas.width;
 
             x = ( canvas.width - value ) * 0.5;
             y = canvas.height - h * i;
-            sy = colours.height - ( i / values.length * colours.height );
-            // console.log( sy );
+            sy = colours.height - ( i / len * colours.height );
 
             canvasContext.drawImage( colours, 0, sy, colours.width, 1, x, y, value, h - 1 );
         }
