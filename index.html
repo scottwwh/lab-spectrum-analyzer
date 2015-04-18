@@ -28,17 +28,16 @@
 </nav>
 
 <div id="drop-target" class="nav">
-    <p class="note">Drag and drop an MP3 or SoundCloud URL here.</p>
-    <p class="credits"></p>
-    <p class="compatibility"></p>
-
+    <p class="note">Drag and drop an MP3 or SoundCloud URL</p>
     <ul id="songs">
-        <li>Other songs:</li>
+        <li>..or try these songs by:</li>
         <li><a class="song" href="https://soundcloud.com/thrilljockey/matmos-teen-paranormal-romance">Matmos</a></li>
         <li><a class="song" href="https://soundcloud.com/kidlogic/souls-of-mischief-93-till">KidLogic</a></li>
-        <li><a class="song" href="https://soundcloud.com/sgayam2/09-runaway-ft-pusha-t">Kanye</a></li>
-        <li><a class="song" href="https://soundcloud.com/dragonflyenergydrinks/pursuit-of-happiness-kid-cudi">Kid Cudi</a></li>
+        <li><a class="song" href="https://soundcloud.com/sgayam2/09-runaway-ft-pusha-t">Kanye West</a></li>
     </ul>
+
+    <p class="status"></p>
+    <p class="compatibility"></p>
 </div>
 
 <canvas id="songcanvas" width="1000" height="325"></canvas>
@@ -48,9 +47,14 @@
 <script type="text/javascript" src="js/spectrum-analyzer.js"></script>
 <script type="text/javascript">
 
-    var lab = new SpectrumAnalyzer();
-    lab.renderer = new CanvasRenderer();
-    lab.init();
+    var app = new SpectrumAnalyzer();
+    app.trackEvent = function( action, label, value, noninteraction )
+    {
+        if ( typeof _gaq !== 'undefined' )
+            _gaq.trackEvent( 'Spectrum Analyzer', action, label, value, noninteraction );
+    };
+    app.renderer = new CanvasRenderer();
+    app.init();
 
 </script>
 

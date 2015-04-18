@@ -19,7 +19,7 @@ var DropTarget = function()
         e.stopPropagation();
         e.preventDefault();
 
-        lab.updateNote('Loading...');
+        lab.updateStatus('Loading...');
 
         var data = e.dataTransfer || e.originalEvent.dataTransfer;
         if ( data.files.length > 0
@@ -29,7 +29,7 @@ var DropTarget = function()
             // Ref: http://stackoverflow.com/questions/10413548/javascript-filereader-using-a-lot-of-memory
             var url = window.URL || window.webkitURL;
             var src = url.createObjectURL( data.files[0] );
-            lab.updateNote( data.files[0].name )
+            lab.updateStatus( data.files[0].name )
             lab.loadSong( src );
         }
         else if ( data.getData("URL").indexOf('soundcloud.com') > -1 )
@@ -38,7 +38,7 @@ var DropTarget = function()
         }
         else
         {
-            lab.updateNote( "Sorry, that didn't work - try something else." )
+            lab.updateStatus( "Sorry, that didn't work - try something else." )
         }
 
         e.currentTarget.classList.remove( 'over' );
@@ -81,6 +81,7 @@ var SpectrumAnalyzer = function()
     this.fftSize = 256;
     this.renderer = null;
     this.timeout = null;
+    this.baseURL = 'https://soundcloud.com/';
 
 
     // Initialize - and grab an SC URL?
@@ -107,6 +108,7 @@ var SpectrumAnalyzer = function()
 
         this.hideNav();
 
+        window.addEventListener( 'hashchange', this.hashChange.bind(this) );
         window.addEventListener( 'mousemove', this.mouseHandler.bind(this) );
         window.addEventListener( 'resize', this.resize.bind(this) );
     };
@@ -132,12 +134,18 @@ var SpectrumAnalyzer = function()
         }
 
 
-        this.audio.addEventListener("canplay", function(e) {
+        this.audio.addEventListener("canplay", function(e)
+        {
+            // console.log(e.type);
+
             // Hide loading graphic
 
             // Does nothing in FF
             if ( this.supportsWebAudio )
             {
+                // console.log('Cancel animation');
+                cancelAnimationFrame( this.audioAnimation );
+
                 this.setupAudioNodes();
             }
             else
@@ -162,23 +170,20 @@ var SpectrumAnalyzer = function()
 
     this.audioHandler = function(e)
     {
-        return;
-        console.log(e.type);
+        // console.log(e.type);
+
         if (e.type == 'playing')
         {
-            console.log( "Playing a duration of", this.audio.duration );
+            // console.log( "Playing a duration of", this.audio.duration );
         }
         else if (e.type == 'timeupdate')
         {
-
         }
         else if (e.type == 'pause')
         {
-
         }
         else if (e.type == 'play')
         {
-            console.log(this.audio);
         }
     };
 
@@ -200,22 +205,7 @@ var SpectrumAnalyzer = function()
             var els = document.querySelectorAll('.nav');
             for ( var i = 0; i < els.length; i++ )
                 els[i].classList.add('hide');
-        }, 5000 );
-    };
-
-    this.loadDefaultSong = function(e)
-    {
-        e.preventDefault();
-
-        var path = e.currentTarget.getAttribute('href');
-        if ( path.indexOf( 'soundcloud' ) > -1 )
-        {
-            this.loadSongFromSC( path );
-        }
-        else
-        {
-            this.loadSong( path );
-        }
+        }, 3500 );
     };
 
 
@@ -260,18 +250,31 @@ var SpectrumAnalyzer = function()
         this.audioAnimation = requestAnimationFrame( this.update.bind(this) );
     };
 
-    this.updateNote = function( str )
+    this.updateStatus = function( str )
     {
-        document.querySelector('p.note').innerHTML = str;
+        document.querySelector('p.status').innerHTML = str;
     };
 
 
 
+    this.loadDefaultSong = function(e)
+    {
+        e.preventDefault();
+
+        var path = e.currentTarget.getAttribute('href');
+        if ( path.indexOf( 'soundcloud' ) > -1 )
+        {
+            this.loadSongFromSC( path );
+        }
+        else
+        {
+            this.loadSong( path );
+        }
+    };
+
     this.loadSong = function(url)
     {
         if (this.sourceNode) this.sourceNode.disconnect();
-
-        cancelAnimationFrame( this.audioAnimation );
 
         this.audio.src = url;
     };
@@ -282,7 +285,7 @@ var SpectrumAnalyzer = function()
         var scClientId = 'a20b2507998bc9f8f0874f12de0efb84';
         var resolvedUrl = 'http://api.soundcloud.com/resolve.json?url=' + url + '&client_id=' + scClientId;
 
-        this.updateNote('Loading...');
+        this.updateStatus('Loading...');
 
         $.ajax({
             url: resolvedUrl,
@@ -296,7 +299,7 @@ var SpectrumAnalyzer = function()
                     a.appendChild( document.createTextNode( result.title ) );
                     a.setAttribute( 'href', result.permalink_url );
 
-                    var el = document.querySelector('p.note');
+                    var el = document.querySelector('p.status');
                     if ( el.childNodes.length > 0 )
                         el.removeChild( el.childNodes[0] );
 
@@ -307,8 +310,6 @@ var SpectrumAnalyzer = function()
 
                     // Update location for linking
                     this.setURL( url );
-
-                    _gaq.push(['_trackPageview']);
                 }
                 else
                 {
@@ -323,9 +324,6 @@ var SpectrumAnalyzer = function()
 
 
 
-
-
-
     this.resize = function(e)
     {
         WIDTH = window.innerWidth;
@@ -334,10 +332,21 @@ var SpectrumAnalyzer = function()
         this.renderer.resize( WIDTH, HEIGHT );
     };
 
-    this.getURL = function()
+    this.hashChange = function(e)
     {
-        if ( window.location.href.indexOf( '?url=' ) > -1 )
-            return decodeURIComponent( window.location.href.substr( window.location.href.indexOf( '?url=' ) + 5 ) );
+        if ( e.newURL != this.getURL() )
+            this.loadSongFromSC( this.getURL(e.newURL) );
+    };
+
+
+
+    this.getURL = function( url )
+    {
+        if ( url )
+            return this.baseURL + url.substr( url.indexOf( 'url=' ) + 4 );
+
+        if ( window.location.href.indexOf( 'url=' ) > -1 )
+            return this.baseURL + window.location.hash.substr( window.location.hash.indexOf( 'url=' ) + 4 );
 
         return null;
     };
@@ -347,12 +356,17 @@ var SpectrumAnalyzer = function()
         if ( this.getURL() == url )
             return;
 
-        var pos = ( window.location.href.indexOf( '?url=' ) == -1 ) ? window.location.href.length : window.location.href.indexOf( '?url=' ) ;
-        var location = window.location.href.substr( 0, pos ) + '?url=' + encodeURIComponent( url );
+        this.trackEvent( 'Load SoundCloud URL', url, null, false );
 
-        // Need to support updates when state changes
-        window.history.pushState( {}, "", location );
-    }
+        url = url.replace( this.baseURL,'' );
+        window.location.hash = 'url=' + url;
+    };
+
+
+
+    /** CONVENIENCE **/
+
+    this.trackEvent = function( action, label, value, noninteraction ) {};
 };
 
 
