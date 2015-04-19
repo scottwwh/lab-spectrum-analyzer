@@ -1,74 +1,4 @@
 
-
-var DropTarget = function()
-{
-    this.dropTarget;
-
-
-    this.init = function()
-    {
-        this.dropTarget = document.getElementById( 'drop-target' );
-        this.dropTarget.addEventListener( 'drop', this.drop, false );
-        this.dropTarget.addEventListener( 'dragenter', this.dragHandler, false );
-        this.dropTarget.addEventListener( 'dragover', this.dragHandler, false );
-        this.dropTarget.addEventListener( 'dragleave', this.dragHandler.bind(this), false );
-    };
-
-    this.drop = function( e )
-    {
-        e.stopPropagation();
-        e.preventDefault();
-
-        lab.updateStatus('Loading...');
-
-        var data = e.dataTransfer || e.originalEvent.dataTransfer;
-        if ( data.files.length > 0
-                && data.files[0].name.indexOf( '.mp3' ) > -1
-                )
-        {
-            // Ref: http://stackoverflow.com/questions/10413548/javascript-filereader-using-a-lot-of-memory
-            var url = window.URL || window.webkitURL;
-            var src = url.createObjectURL( data.files[0] );
-            lab.updateStatus( data.files[0].name )
-            lab.loadSong( src );
-        }
-        else if ( data.getData("URL").indexOf('soundcloud.com') > -1 )
-        {
-            lab.loadSongFromSC( data.getData("URL") );
-        }
-        else
-        {
-            lab.updateStatus( "Sorry, that didn't work - try something else." )
-        }
-
-        e.currentTarget.classList.remove( 'over' );
-
-        return false;
-    };
-
-    this.dragHandler = function(e)
-    {
-        if ( e.type == 'dragover' )
-        {
-            e.stopPropagation();
-            e.preventDefault();
-        }
-        else if ( e.type == 'dragenter' )
-        {
-            $('#drop-target').addClass( 'over' );
-        }
-        else if ( e.type == 'dragleave' )
-        {
-            $('#drop-target').removeClass( 'over' );
-        }
-    };
-};
-
-var drop = new DropTarget();
-drop.init();
-
-
-
 var SpectrumAnalyzer = function()
 {
     this.audio;
@@ -108,6 +38,12 @@ var SpectrumAnalyzer = function()
 
         this.hideNav();
 
+        var dropTarget = document.getElementById( 'drop-target' );
+        dropTarget.addEventListener( 'drop', this.dropHandler.bind(this), false );
+        dropTarget.addEventListener( 'dragenter', this.dragHandler.bind(this), false );
+        dropTarget.addEventListener( 'dragover', this.dragHandler.bind(this), false );
+        dropTarget.addEventListener( 'dragleave', this.dragHandler.bind(this), false );
+
         window.addEventListener( 'hashchange', this.hashChange.bind(this) );
         window.addEventListener( 'mousemove', this.mouseHandler.bind(this) );
         window.addEventListener( 'resize', this.resize.bind(this) );
@@ -133,28 +69,7 @@ var SpectrumAnalyzer = function()
             return;
         }
 
-
-        this.audio.addEventListener("canplay", function(e)
-        {
-            // console.log(e.type);
-
-            // Hide loading graphic
-
-            // Does nothing in FF
-            if ( this.supportsWebAudio )
-            {
-                // console.log('Cancel animation');
-                cancelAnimationFrame( this.audioAnimation );
-
-                this.setupAudioNodes();
-            }
-            else
-            {
-                this.audio.play();
-            }
-
-        }.bind(this), false);
-
+        this.audio.addEventListener("canplay", this.audioHandler.bind(this), false );
         this.audio.addEventListener("playing", this.audioHandler.bind(this), false );
         this.audio.addEventListener("timeupdate", this.audioHandler.bind(this), false );
         this.audio.addEventListener("pause", this.audioHandler.bind(this), false );
@@ -168,11 +83,28 @@ var SpectrumAnalyzer = function()
         // this.audio.addEventListener("ended", this.audioHandler.bind(this), false );
     };
 
+
+    /** Event handlers **/
+
     this.audioHandler = function(e)
     {
         // console.log(e.type);
 
-        if (e.type == 'playing')
+        if (e.type == 'canplay')
+        {
+            // Hide loading graphic
+
+            if ( this.supportsWebAudio )
+            {
+                cancelAnimationFrame( this.audioAnimation );
+                this.setupAudioNodes();
+            }
+            else
+            {
+                this.audio.play();
+            }
+        }
+        else if (e.type == 'playing')
         {
             // console.log( "Playing a duration of", this.audio.duration );
         }
@@ -187,7 +119,80 @@ var SpectrumAnalyzer = function()
         }
     };
 
+    this.dropHandler = function( e )
+    {
+        e.stopPropagation();
+        e.preventDefault();
+
+        this.updateStatus('Loading...');
+
+        var data = e.dataTransfer || e.originalEvent.dataTransfer;
+        if ( data.files.length > 0
+                && data.files[0].name.indexOf( '.mp3' ) > -1
+                )
+        {
+            // Ref: http://stackoverflow.com/questions/10413548/javascript-filereader-using-a-lot-of-memory
+            var url = window.URL || window.webkitURL;
+            var src = url.createObjectURL( data.files[0] );
+            this.updateStatus( data.files[0].name );
+            this.loadSong( src );
+        }
+        else if ( data.getData("URL").indexOf('soundcloud.com') > -1 )
+        {
+            this.loadSongFromSC( data.getData("URL") );
+        }
+        else
+        {
+            this.updateStatus( "Sorry, that didn't work - try something else." )
+        }
+
+        e.currentTarget.classList.remove( 'over' );
+
+        return false;
+    };
+
+    this.dragHandler = function(e)
+    {
+        if ( e.type == 'dragover' )
+        {
+            e.stopPropagation();
+            e.preventDefault();
+        }
+        else if ( e.type == 'dragenter' )
+        {
+            this.showNav();
+
+            $('#drop-target').addClass( 'over' );
+        }
+        else if ( e.type == 'dragleave' )
+        {
+            $('#drop-target').removeClass( 'over' );
+        }
+    };
+
     this.mouseHandler = function(e)
+    {
+        this.showNav();
+    };
+
+    this.resize = function(e)
+    {
+        WIDTH = window.innerWidth;
+        HEIGHT = window.innerHeight;
+
+        this.renderer.resize( WIDTH, HEIGHT );
+    };
+
+    this.hashChange = function(e)
+    {
+        if ( e.newURL != this.getURL() )
+            this.loadSongFromSC( this.getURL(e.newURL) );
+    };
+
+
+    /** Nav **/
+
+    this.showNav = function()
     {
         var els = document.querySelectorAll('.nav');
         for ( var i = 0; i < els.length; i++ )
@@ -209,6 +214,7 @@ var SpectrumAnalyzer = function()
     };
 
 
+    /** Web audio **/
 
     this.setupAudioNodes = function()
     {
@@ -228,8 +234,6 @@ var SpectrumAnalyzer = function()
 
         this.update();
     };
-
-
 
     this.update = function()
     {
@@ -323,22 +327,7 @@ var SpectrumAnalyzer = function()
     };
 
 
-
-    this.resize = function(e)
-    {
-        WIDTH = window.innerWidth;
-        HEIGHT = window.innerHeight;
-
-        this.renderer.resize( WIDTH, HEIGHT );
-    };
-
-    this.hashChange = function(e)
-    {
-        if ( e.newURL != this.getURL() )
-            this.loadSongFromSC( this.getURL(e.newURL) );
-    };
-
-
+    /** Getters and setters **/
 
     this.getURL = function( url )
     {
@@ -369,6 +358,10 @@ var SpectrumAnalyzer = function()
     this.trackEvent = function( action, label, value, noninteraction ) {};
 };
 
+
+/**
+ * Default renderer
+ */
 
 var CanvasRenderer = function()
 {

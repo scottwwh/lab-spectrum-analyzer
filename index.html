@@ -51,7 +51,7 @@
     app.trackEvent = function( action, label, value, noninteraction )
     {
         if ( typeof _gaq !== 'undefined' )
-            _gaq.trackEvent( 'Spectrum Analyzer', action, label, value, noninteraction );
+            _gaq.push([ '_trackEvent', 'Spectrum Analyzer', action, label, value, noninteraction ]);
     };
     app.renderer = new CanvasRenderer();
     app.init();
