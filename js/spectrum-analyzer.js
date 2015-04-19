@@ -34,6 +34,9 @@ var SpectrumAnalyzer = function()
         if ( url != null )
         {
             this.loadSongFromSC( url );
+
+            // Track now because URL will be disregarded in setURL
+            this.trackEvent( 'Load SoundCloud URL', url, null, false );
         }
 
         this.hideNav();
