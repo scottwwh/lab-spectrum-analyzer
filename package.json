@@ -1,0 +1,21 @@
+{
+  "name": "lab-spectrum-analyzer",
+  "version": "1.0.0",
+  "description": "0.0.1",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "browser-sync start --server --files 'src/*'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://scottwwh@bitbucket.org/scottwwh/lab-spectrum-analyzer.git"
+  },
+  "author": "Scott Harley",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/scottwwh/lab-spectrum-analyzer#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "gulp": "^3.9.1"
+  }
+}

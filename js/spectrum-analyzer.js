@@ -20,7 +20,7 @@ var SpectrumAnalyzer = function()
         // Initialize existing links
         var els = document.querySelectorAll('.song');
         for ( var i = 0; i < els.length; i++ )
-            els[i].addEventListener( 'click', this.loadDefaultSong.bind( this ) );
+            els[i].addEventListener( 'click', this.loadSongFromClick.bind( this ) );
 
         this.initAudio();
 
@@ -264,9 +264,19 @@ var SpectrumAnalyzer = function()
 
 
 
-    this.loadDefaultSong = function(e)
+    this.loadSongFromClick = function(e)
     {
         e.preventDefault();
+
+
+        // Unstyle links
+        document.querySelectorAll('.song').forEach(el => {
+            el.classList.remove('enabled');
+        });
+
+        // Style active link
+        e.currentTarget.classList.add('enabled');
+
 
         var path = e.currentTarget.getAttribute('href');
         if ( path.indexOf( 'soundcloud' ) > -1 )
@@ -277,13 +287,6 @@ var SpectrumAnalyzer = function()
         {
             this.loadSong( path );
         }
-    };
-
-    this.loadSong = function(url)
-    {
-        if (this.sourceNode) this.sourceNode.disconnect();
-
-        this.audio.src = url;
     };
 
     // Resolve SC stream from URL
@@ -329,6 +332,15 @@ var SpectrumAnalyzer = function()
         });
     };
 
+    // Load an alreadu-resolved SC URL
+    this.loadSong = function(url)
+    {
+        if (this.sourceNode) this.sourceNode.disconnect();
+
+        this.audio.src = url;
+    };
+
+
 
     /** Getters and setters **/
 
@@ -366,7 +378,7 @@ var SpectrumAnalyzer = function()
  * Default renderer
  */
 
-var CanvasRenderer = function()
+var SpectrumAnalyzerDefaultRenderer = function()
 {
     WIDTH = window.innerWidth;
     HEIGHT = window.innerHeight;
