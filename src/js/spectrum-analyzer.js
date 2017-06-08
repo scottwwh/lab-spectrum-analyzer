@@ -27,6 +27,14 @@ var SpectrumAnalyzer = function()
         if ( ! this.supportsWebAudio )
             document.querySelector('p.compatibility').innerHTML = "(Your browser does not support WebAudio)";
 
+        // Check renderer
+        if (this.renderer) {
+            // this.renderer.init();
+        } else {
+            console.warn('No renderer set, fall back to default');
+            this.renderer = new SpectrumAnalyzerDefaultRenderer();
+        }
+
         this.renderer.init();
 
         // Check for URL to load
@@ -183,7 +191,11 @@ var SpectrumAnalyzer = function()
         WIDTH = window.innerWidth;
         HEIGHT = window.innerHeight;
 
-        this.renderer.resize( WIDTH, HEIGHT );
+        if (this.renderer) {
+            this.renderer.resize( WIDTH, HEIGHT );
+        } else {
+            console.warn('No renderer set');
+        }
     };
 
     this.hashChange = function(e)
