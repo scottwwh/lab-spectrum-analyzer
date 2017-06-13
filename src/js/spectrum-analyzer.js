@@ -20,39 +20,31 @@ var SpectrumAnalyzer = function()
 
 
     // Initialize - and grab an SC URL?
-    this.init = function()
+    this.init = function(playDefault)
     {
         // Initialize existing links
         var els = document.querySelectorAll('.song');
-        for ( var i = 0; i < els.length; i++ )
+        for ( var i = 0; i < els.length; i++ ) {
             els[i].addEventListener( 'click', this.loadSongFromClick.bind( this ) );
+        }
 
         this.initAudio();
 
         if ( ! this.supportsWebAudio )
             document.querySelector('p.compatibility').innerHTML = "(Your browser does not support WebAudio)";
 
+        // TODO: Check support for WebGL and if so:
+        // this.renderer = new SpectrumAnalyzer3dRenderer();
+        //
         // Check renderer
         if (this.renderer) {
-            // this.renderer.init();
+            console.log('Found renderer', this.renderer);
         } else {
             console.warn('No renderer set, fall back to default');
             this.renderer = new SpectrumAnalyzerDefaultRenderer();
         }
 
         this.renderer.init();
-
-        // Check for URL to load
-        var url = this.getURL();
-        if ( url != null )
-        {
-            this.loadSongFromSC( url );
-
-            // Track now because URL will be disregarded in setURL
-            this.trackEvent( 'Load SoundCloud URL', url, null, false );
-        }
-
-        this.hideNav();
 
         var dropTarget = document.getElementById( 'drop-target' );
         dropTarget.addEventListener( 'drop', this.dropHandler.bind(this), false );
@@ -63,6 +55,44 @@ var SpectrumAnalyzer = function()
         window.addEventListener( 'hashchange', this.hashChange.bind(this) );
         window.addEventListener( 'mousemove', this.mouseHandler.bind(this) );
         window.addEventListener( 'resize', this.resize.bind(this) );
+
+        this.hideNav();
+
+        // Check for URL to load
+        var url = this.getURL();
+        if (url != null)
+        {
+            this.loadSongFromSC(url);
+
+            // Load track now because URL will be disregarded in setURL (??)
+            this.trackEvent('Load SoundCloud URL', url, null, false);
+
+        // Play default song
+        } else if (playDefault) {
+            this.updateStatus('Loading in 5s...');
+
+            var time = new Date().getTime();
+            this.defaultInterval = setInterval(function() {
+                this.initDefaultPlayback(time);
+            }.bind(this), 1000);
+        }
+    };
+
+    this.defaultInterval = null;
+    this.defaultTime = null;
+
+    this.initDefaultPlayback = function(time) {
+        var delta = new Date().getTime() - time;
+        if (delta < 5000) {
+            var msg = 'Loading in ' + Math.round(5 - delta / 1000) + 's...';
+            this.updateStatus(msg);
+
+        } else {
+            clearTimeout(this.defaultInterval);
+
+            url = document.querySelector('.song').getAttribute('href');
+            this.loadSongFromSC(url);
+        }
     };
 
     this.initAudio = function()
@@ -169,6 +199,7 @@ var SpectrumAnalyzer = function()
 
     this.dragHandler = function(e)
     {
+        // Unclear what this does..
         if ( e.type == 'dragover' )
         {
             e.stopPropagation();
@@ -176,13 +207,11 @@ var SpectrumAnalyzer = function()
         }
         else if ( e.type == 'dragenter' )
         {
-            this.showNav();
-
-            $('#drop-target').addClass( 'over' );
+            document.querySelector('#drop-target').classList.add( 'over' );
         }
         else if ( e.type == 'dragleave' )
         {
-            $('#drop-target').removeClass( 'over' );
+            document.querySelector('#drop-target').classList.remove( 'over' );
         }
     };
 

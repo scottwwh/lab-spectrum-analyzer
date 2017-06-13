@@ -1,16 +1,30 @@
-SETUP
+# Spectrum analyzer
 
+Looking after this after many years, very much WIP..
+
+## Installation
+
+```
+# Does nothing at the moment!
 % npm install gulp --global
 
+# Important :)
+% npm install browser-sync --global
+% npm start
+```
+
+## TODO
+
+- [WHAT?] Ability to pause audio (because damn)
+- [BUG] Fallback for IE/etc/whatever
+- [BUG[ Compatibility for Firefox?
+- [NTH] Show loader
+- [NTH] Show when song is over / timeline for completion
+- Improve 3D renderer
+- Move WebAudio logic into library
 
 
-
-- Ability to pause audio (because damn)
-- Fallback for IE/etc/whatever
-- Compatibility for Firefox?
-- Show loader
-- Show when song is over / timeline for completion
-
+## Reference
 
 Reference:
 

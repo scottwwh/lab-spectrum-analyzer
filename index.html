@@ -46,8 +46,8 @@
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="src/js/three.min.js"></script>
 <script type="text/javascript" src="src/js/spectrum-analyzer.js"></script>
-<script type="text/javascript" src="src/js/renderer/default.js"></script>
-<script type="text/javascript" src="src/js/renderer/3d.js"></script>
+<script type="text/javascript" src="src/js/renderers/DefaultRenderer.js"></script>
+<script type="text/javascript" src="src/js/renderers/WebGlRenderer.js"></script>
 <script type="text/javascript">
 
     var app = new SpectrumAnalyzer();
@@ -56,21 +56,7 @@
         if ( typeof _gaq !== 'undefined' )
             _gaq.push([ '_trackEvent', 'Spectrum Analyzer', action, label, value, noninteraction ]);
     };
-    // app.renderer = new SpectrumAnalyzer3dRenderer();
-    app.init();
-
-
-    // Play default song
-    var el = document.querySelector('.song');
-    var url = el.getAttribute('href');
-    // console.log(el);
-    // app.loadSongFromSC(url);
-
-
-    // TODO: Figure out what this does!
-    //
-    // Debug
-    // app.renderer.init();
+    app.init(true);
 
 </script>
 
