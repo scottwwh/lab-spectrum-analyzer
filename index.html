@@ -43,22 +43,11 @@
 <canvas id="songcanvas" width="1000" height="325"></canvas>
 <canvas id="colourTable" width="512" height="256"></canvas>
 
+<!-- Delete this! -->
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+
 <script type="text/javascript" src="src/js/three.min.js"></script>
-<script type="text/javascript" src="src/js/spectrum-analyzer.js"></script>
-<script type="text/javascript" src="src/js/renderers/DefaultRenderer.js"></script>
-<script type="text/javascript" src="src/js/renderers/WebGlRenderer.js"></script>
-<script type="text/javascript">
-
-    var app = new SpectrumAnalyzer();
-    app.trackEvent = function( action, label, value, noninteraction )
-    {
-        if ( typeof _gaq !== 'undefined' )
-            _gaq.push([ '_trackEvent', 'Spectrum Analyzer', action, label, value, noninteraction ]);
-    };
-    app.init(true);
-
-</script>
+<script type="text/javascript" src="bundle.js"></script>
 
 </body>
 </html>

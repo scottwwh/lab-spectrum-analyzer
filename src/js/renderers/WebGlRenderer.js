@@ -96,3 +96,5 @@
             canvas.width = w;
         }
     };
+
+export default SpectrumAnalyzer3dRenderer;

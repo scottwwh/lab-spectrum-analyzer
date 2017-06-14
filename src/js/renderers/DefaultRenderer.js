@@ -1,8 +1,8 @@
 
 var SpectrumAnalyzerDefaultRenderer = function()
 {
-    WIDTH = window.innerWidth;
-    HEIGHT = window.innerHeight;
+    var WIDTH = window.innerWidth;
+    var HEIGHT = window.innerHeight;
 
     var canvas = document.getElementById('songcanvas');
     canvas.width = WIDTH;
@@ -81,3 +81,5 @@ var SpectrumAnalyzerDefaultRenderer = function()
         canvas.width = w;
     }
 };
+
+export default SpectrumAnalyzerDefaultRenderer;

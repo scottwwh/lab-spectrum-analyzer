@@ -2,6 +2,8 @@
 
 Looking after this after many years, very much WIP..
 
+Node 6.x LTS
+
 ## Installation
 
 ```
@@ -9,12 +11,14 @@ Looking after this after many years, very much WIP..
 % npm install gulp --global
 
 # Important :)
-% npm install browser-sync --global
+% npm install --global browser-sync
+% npm install --global rollup
 % npm start
 ```
 
 ## TODO
 
+- Rollup, Babel, Browserify ?
 - [WHAT?] Ability to pause audio (because damn)
 - [BUG] Fallback for IE/etc/whatever
 - [BUG[ Compatibility for Firefox?
