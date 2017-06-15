@@ -20,13 +20,12 @@ Node 6.x LTS
 ## TODO
 
 - [DONE] Rollup to modularize code
-- THREE.js modules from Bower
+- THREE.js modules from Bower or NPM
 - Babel to transpile down to ES5
 - Gulp to automate ??
 - Add text input for SoundCloud URLs rather than shit drag/drop mechanism I originally added
-- [WHAT?] Ability to pause audio (because damn)
 - [BUG] Fallback for IE/etc/whatever
-- [BUG[ Compatibility for Firefox?
+- [BUG[ Compatibility for Firefox's WebAudio limitation
 - [NTH] Show loader
 - [NTH] Show when song is over / timeline for completion
 - Improve 3D renderer
