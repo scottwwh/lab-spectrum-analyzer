@@ -38,8 +38,8 @@ var SpectrumAnalyzer = function()
             document.querySelector('p.compatibility').innerHTML = "(Your browser does not support WebAudio)";
 
         // TODO: Check support for WebGL and if so:
-        // this.renderer = new WebGlRenderer();
-        //
+        this.renderer = new WebGlRenderer(this);
+
         // Check renderer
         if (this.renderer) {
             console.log('Found renderer', this.renderer);

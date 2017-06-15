@@ -5,7 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "browser-sync start --server --files 'src/*'"
+    "dev": "rollup -c -w",
+    "start": "browser-sync start --server --files 'build/*'"
   },
   "repository": {
     "type": "git",
@@ -16,6 +17,8 @@
   "homepage": "https://bitbucket.org/scottwwh/lab-spectrum-analyzer#readme",
   "dependencies": {},
   "devDependencies": {
-    "gulp": "^3.9.1"
+    "gulp": "^3.9.1",
+    "rollup": "^0.43.0",
+    "rollup-watch": "^4.0.0"
   }
 }

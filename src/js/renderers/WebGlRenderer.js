@@ -1,8 +1,9 @@
 
-    var SpectrumAnalyzer3dRenderer = function()
+    var SpectrumAnalyzer3dRenderer = function(app)
     {
-        WIDTH = window.innerWidth;
-        HEIGHT = window.innerHeight;
+        var app = app;
+        var WIDTH = window.innerWidth;
+        var HEIGHT = window.innerHeight;
 
         var canvas = document.getElementById('songcanvas');
         canvas.width = WIDTH;
@@ -10,19 +11,22 @@
 
 
         this.cubes = [];
+        this.scene;
+        this.camera;
+        this.renderer;
 
 
         // Loop keeps playing even when no sound
         this.init = function()
         {
-            scene = new THREE.Scene();
+            this.scene = new THREE.Scene();
 
-            light = new THREE.PointLight( 0xffffff, 1 );
+            var light = new THREE.PointLight( 0xffffff, 1 );
             // light.intensity = 100;
             // light.position.y = 250;
 
-            camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
-            camera.position.z = 1000;
+            this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
+            this.camera.position.z = 1000;
 
             var max = app.fftSize * 0.5;
             var row, col, len = Math.floor(Math.sqrt(max)), increm = 100;
@@ -33,27 +37,27 @@
                 row = Math.floor( i / len );
                 // console.log(col,row);
 
-                geometry = new THREE.BoxGeometry( 75, 75, 75 );
+                var geometry = new THREE.BoxGeometry( 75, 75, 75 );
                 // material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
-                material = new THREE.MeshLambertMaterial( { color: 0xff0000, transparent: true, shading: THREE.FlatShading } );
+                var material = new THREE.MeshLambertMaterial( { color: 0xff0000, transparent: true, shading: THREE.FlatShading } );
                 material.opacity = 0.5;
 
-                mesh = new THREE.Mesh( geometry, material );
+                var mesh = new THREE.Mesh( geometry, material );
                 mesh.position.x = row * increm - ( len * increm * 0.5 );
                 mesh.position.y = -500;
                 mesh.position.z = col * increm - ( len * increm * 0.5 );
 
-                scene.add( mesh );
+                this.scene.add( mesh );
 
                 this.cubes.push( mesh );
             }
             console.log(this.cubes.length,app.fftSize);
 
-            scene.add( light );
+            this.scene.add( light );
             // scene.add( new THREE.AmbientLight( 0x00ff00 ) );
 
-            renderer = new THREE.WebGLRenderer( { canvas: canvas } );
-            renderer.setSize( window.innerWidth, window.innerHeight );
+            this.renderer = new THREE.WebGLRenderer( { canvas: canvas } );
+            this.renderer.setSize( window.innerWidth, window.innerHeight );
 
 
             // document.body.appendChild( renderer.domElement );
@@ -80,11 +84,11 @@
                 // this.cubes[i].rotation.z = value;
             }
 
-            camera.position.x = Math.cos( timer ) * 1000;
-            camera.position.z = Math.sin( timer ) * 1000;
-            camera.lookAt( scene.position );
+            this.camera.position.x = Math.cos( timer ) * 1000;
+            this.camera.position.z = Math.sin( timer ) * 1000;
+            this.camera.lookAt( this.scene.position );
 
-            renderer.render( scene, camera );
+            this.renderer.render( this.scene, this.camera );
         };
 
         this.resize = function( w, h )

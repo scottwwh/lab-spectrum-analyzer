@@ -11,14 +11,19 @@ Node 6.x LTS
 % npm install gulp --global
 
 # Important :)
-% npm install --global browser-sync
-% npm install --global rollup
-% npm start
+% npm i --global browser-sync
+% npm i -D rollup
+% npm run dev
+% npm run start
 ```
 
 ## TODO
 
-- Rollup, Babel, Browserify ?
+- [DONE] Rollup to modularize code
+- THREE.js modules from Bower
+- Babel to transpile down to ES5
+- Gulp to automate ??
+- Add text input for SoundCloud URLs rather than shit drag/drop mechanism I originally added
 - [WHAT?] Ability to pause audio (because damn)
 - [BUG] Fallback for IE/etc/whatever
 - [BUG[ Compatibility for Firefox?
