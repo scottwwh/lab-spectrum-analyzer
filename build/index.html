@@ -21,24 +21,40 @@
 </head>
 <body>
 
-<nav class="nav">
-    <audio controls>
-        <source type="audio/mpeg" />
-    </audio>
-</nav>
 
-<div id="drop-target" class="nav">
-    <p class="note">Drag and drop an MP3 or SoundCloud URL</p>
-    <ul id="songs">
-        <li>..or try these songs by:</li>
-        <li><a class="song" href="https://soundcloud.com/thrilljockey/matmos-teen-paranormal-romance">Matmos</a></li>
-        <li><a class="song" href="https://soundcloud.com/kidlogic/souls-of-mischief-93-till">KidLogic</a></li>
-        <li><a class="song" href="https://soundcloud.com/sgayam2/09-runaway-ft-pusha-t">Kanye West</a></li>
-    </ul>
+<div class="flex-grid">
+  <div class="col">
 
-    <p class="status"></p>
-    <p class="compatibility"></p>
+    <nav id="drop-target" class="nav">
+        <p><input type="text" placeholder="Enter a SoundCloud URL.." style="font-size: 1.5rem; padding: 1rem;"/></p>
+        <p class="compatibility"></p>
+    </nav>
+  </div>
+
+  <div class="col">
+    <nav class="nav">
+        <p class="note">Drag/drop an MP3 or try these songs:</li>
+        <ul id="songs">
+            <li><a class="song" href="https://soundcloud.com/thrilljockey/matmos-teen-paranormal-romance">Matmos</a></li>
+            <li><a class="song" href="https://soundcloud.com/kidlogic/souls-of-mischief-93-till">KidLogic</a></li>
+            <li><a class="song" href="https://soundcloud.com/sgayam2/09-runaway-ft-pusha-t">Kanye West</a></li>
+        </ul>
+    </nav>
+  </div>
+
+  <div class="col">
+    <nav class="nav">
+        <p class="status"></p>
+
+        <audio controls>
+            <source type="audio/mpeg" />
+        </audio>
+    </nav>
+  </div>
+
 </div>
+
+
 
 <canvas id="songcanvas" width="1000" height="325"></canvas>
 <canvas id="colourTable" width="512" height="256"></canvas>

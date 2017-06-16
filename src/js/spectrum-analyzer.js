@@ -37,6 +37,9 @@ var SpectrumAnalyzer = function()
         if ( ! this.supportsWebAudio )
             document.querySelector('p.compatibility').innerHTML = "(Your browser does not support WebAudio)";
 
+
+        /* RENDERER */
+
         // TODO: Check support for WebGL and if so:
         this.renderer = new WebGlRenderer(this);
 
@@ -60,7 +63,10 @@ var SpectrumAnalyzer = function()
         window.addEventListener( 'mousemove', this.mouseHandler.bind(this) );
         window.addEventListener( 'resize', this.resize.bind(this) );
 
-        this.hideNav();
+        // this.hideNav();
+
+
+        /* AUDIO */
 
         // Check for URL to load
         var url = this.getURL();
@@ -247,7 +253,7 @@ var SpectrumAnalyzer = function()
 
     this.showNav = function()
     {
-        var els = document.querySelectorAll('.nav');
+        var els = document.querySelectorAll('nav');
         for ( var i = 0; i < els.length; i++ )
             els[i].classList.remove('hide');
 
@@ -259,11 +265,12 @@ var SpectrumAnalyzer = function()
         if ( this.timeout )
             clearTimeout( this.timeout );
 
+        console.log('Hey!');
         this.timeout = setTimeout( function(e) {
-            var els = document.querySelectorAll('.nav');
+            var els = document.querySelectorAll('nav');
             for ( var i = 0; i < els.length; i++ )
                 els[i].classList.add('hide');
-        }, 3500 );
+        }, 10000 );
     };
 
 

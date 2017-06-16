@@ -26,17 +26,32 @@ li {
 }
 
 nav {
+    /*
     position: absolute;
     bottom: 0;
     width: 100%;
     margin-bottom: 1em;
+    */
     text-align: center;
 }
-    nav audio { padding-top: 1em; }
+    nav audio { /* padding-top: 1em; */ }
 
-.nav { transition: opacity 0.5s; }
-    .nav.hide { opacity: 0; }
+nav { transition: opacity 0.5s; }
+    nav.hide { opacity: 0; }
 
+
+
+
+/** NAV **/
+
+.flex-grid {
+    background: gray;
+    display: flex;
+}
+
+.col {
+  flex: 1;
+}
 
 
 /* #credits { display: none; } */
@@ -44,13 +59,28 @@ nav {
 canvas { position: absolute; z-index: -1; top: 0; left: 0; }
 canvas#colourTable { right: 0; display: none; }
 
-div#drop-target {
-    position: absolute; top: 50%; left: 50%; width: 40%; min-width: 15em; transform: translate(-50%,-50%); margin: 0; padding: 2em; color: #fff;
+#drop-target {
+    /*
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40%;
+    */
+
+    /*
+    transform: translate(-50%,-50%);
+    min-width: 15em;
+    padding: 2em;
+    */
+    margin: 0;
+    color: #fff;
     text-align: center;
-    background-color: rgba(25,25,25,0.5);
+    /* background-color: rgba(25,25,25,0.5);
     z-index: 5;
-    border: 5px solid transparent;
+    border: 5px solid transparent; */
+    /*
     border-radius: 0.5em;
+    */
 }
 
 div#drop-target.over { border-color: gold; }

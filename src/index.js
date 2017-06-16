@@ -8,3 +8,4 @@ app.trackEvent = function( action, label, value, noninteraction )
         _gaq.push([ '_trackEvent', 'Spectrum Analyzer', action, label, value, noninteraction ]);
 };
 app.init(true);
+// app.init(false);
