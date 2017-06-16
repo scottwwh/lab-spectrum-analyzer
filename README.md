@@ -19,17 +19,18 @@ Node 6.x LTS
 
 ## TODO
 
-- [DONE] Rollup to modularize code
 - THREE.js modules from Bower or NPM
 - Babel to transpile down to ES5
 - Gulp to automate ??
-- Add text input for SoundCloud URLs rather than shit drag/drop mechanism I originally added
+- Remove drag/drop nonsense for SC URLs that I originally added
 - [BUG] Fallback for IE/etc/whatever
 - [BUG[ Compatibility for Firefox's WebAudio limitation
 - [NTH] Show loader
 - [NTH] Show when song is over / timeline for completion
 - Improve 3D renderer
 - Move WebAudio logic into library
+- [DONE] Rollup to modularize code
+- [DONE] Add text input for SoundCloud URLs
 
 
 ## Reference

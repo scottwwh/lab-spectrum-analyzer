@@ -246,12 +246,34 @@ var SpectrumAnalyzer = function()
         window.addEventListener( 'mousemove', this.mouseHandler.bind(this) );
         window.addEventListener( 'resize', this.resize.bind(this) );
 
+
+        /* MENU */
+
         // this.hideNav();
+        document.querySelector('input').addEventListener('keyup', e => {
+
+            // Validate URL
+            const url = e.currentTarget.value;
+
+            // TODO: Reduce suckitude and combine with other logic!
+            if (url.indexOf('http') > -1) {
+                console.log('Validate URL:', url);
+                this.loadSongFromSC(url);
+
+                // Green border
+            } else {
+                // Invalid URL
+
+                // No border
+            }
+
+        });
+
 
 
         /* AUDIO */
 
-        // Check for URL to load
+        // Check for current URL and load
         var url = this.getURL();
         if (url != null)
         {
@@ -358,6 +380,7 @@ var SpectrumAnalyzer = function()
         }
     };
 
+    // TODO: Improve this a lot!
     this.dropHandler = function( e )
     {
         e.stopPropagation();
@@ -448,7 +471,7 @@ var SpectrumAnalyzer = function()
         if ( this.timeout )
             clearTimeout( this.timeout );
 
-        console.log('Hey!');
+        // console.log('Hey!');
         this.timeout = setTimeout( function(e) {
             var els = document.querySelectorAll('nav');
             for ( var i = 0; i < els.length; i++ )
@@ -530,8 +553,9 @@ var SpectrumAnalyzer = function()
     };
 
     // Resolve SC stream from URL
-    this.loadSongFromSC = function( url )
+    this.loadSongFromSC = function(url)
     {
+        // TODO: Proxy this request?
         var scClientId = 'a20b2507998bc9f8f0874f12de0efb84';
         var resolvedUrl = 'http://api.soundcloud.com/resolve.json?url=' + url + '&client_id=' + scClientId;
 
