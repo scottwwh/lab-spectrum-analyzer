@@ -41,7 +41,7 @@ var SpectrumAnalyzer = function()
         /* RENDERER */
 
         // TODO: Check support for WebGL and if so:
-        this.renderer = new WebGlRenderer(this);
+        // this.renderer = new WebGlRenderer(this);
 
         // Check renderer
         if (this.renderer) {
@@ -53,11 +53,16 @@ var SpectrumAnalyzer = function()
 
         this.renderer.init();
 
-        var dropTarget = document.getElementById( 'drop-target' );
+
+        /* DRAG AND DROP */
+
+        var dropTarget = document.getElementById('drop-target');
+        var dragEvents = 'dragenter,dragover,dragleave';
+        dragEvents.split(',').forEach(e => {
+            dropTarget.addEventListener(e, this.dragHandler.bind(this), false);
+        });
         dropTarget.addEventListener( 'drop', this.dropHandler.bind(this), false );
-        dropTarget.addEventListener( 'dragenter', this.dragHandler.bind(this), false );
-        dropTarget.addEventListener( 'dragover', this.dragHandler.bind(this), false );
-        dropTarget.addEventListener( 'dragleave', this.dragHandler.bind(this), false );
+        
 
         window.addEventListener( 'hashchange', this.hashChange.bind(this) );
         window.addEventListener( 'mousemove', this.mouseHandler.bind(this) );
@@ -182,9 +187,30 @@ var SpectrumAnalyzer = function()
         }
     };
 
-    // TODO: Improve this a lot!
-    this.dropHandler = function( e )
+
+    // Combine with dropHandler ?
+    this.dragHandler = function(e)
     {
+        // Forgot why I'm doing this..
+        if ( e.type == 'dragover' )
+        {
+            e.stopPropagation();
+            e.preventDefault();
+        }
+        else if ( e.type == 'dragenter' )
+        {
+            document.querySelector('#drop-target').classList.add( 'over' );
+        }
+        else if ( e.type == 'dragleave' )
+        {
+            document.querySelector('#drop-target').classList.remove( 'over' );
+        }
+    };
+
+    // TODO: Improve this a lot!
+    this.dropHandler = function(e)
+    {
+        console.log(this, e.currentTarget);
         e.stopPropagation();
         e.preventDefault();
 
@@ -218,23 +244,6 @@ var SpectrumAnalyzer = function()
         return false;
     };
 
-    this.dragHandler = function(e)
-    {
-        // Unclear what this does..
-        if ( e.type == 'dragover' )
-        {
-            e.stopPropagation();
-            e.preventDefault();
-        }
-        else if ( e.type == 'dragenter' )
-        {
-            document.querySelector('#drop-target').classList.add( 'over' );
-        }
-        else if ( e.type == 'dragleave' )
-        {
-            document.querySelector('#drop-target').classList.remove( 'over' );
-        }
-    };
 
     this.mouseHandler = function(e)
     {

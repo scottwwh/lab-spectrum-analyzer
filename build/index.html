@@ -22,13 +22,11 @@
 <body>
 
 
-<div class="flex">
-  <div class="col">
+<nav class="flex" id="drop-target">
 
-    <nav id="drop-target" class="nav">
-        <p><input type="text" placeholder="Enter a SoundCloud URL.." style="font-size: 1.5rem; padding: 1rem;"/></p>
-        <p class="compatibility"></p>
-    </nav>
+  <div class="col">
+    <p><input type="text" placeholder="Enter a SoundCloud URL.." style="font-size: 1.5rem; padding: 1rem;"/></p>
+    <p class="compatibility"></p>
   </div>
 
 <!--
@@ -45,16 +43,14 @@
 -->
 
   <div class="col">
-    <nav class="nav">
-        <p class="status"></p>
+    <audio controls>
+        <source type="audio/mpeg" />
+    </audio>
 
-        <audio controls>
-            <source type="audio/mpeg" />
-        </audio>
-    </nav>
+    <p class="status"></p>
   </div>
 
-</div>
+</nav>
 
 
 
