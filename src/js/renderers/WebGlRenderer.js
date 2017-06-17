@@ -72,8 +72,6 @@
             // requestAnimationFrame( this.render.bind(this) );
             var timer = 0.0001 * Date.now();
 
-            console.log(values.length);
-
             var value;
             for ( var i = 0; i < this.cubes.length; i++ )
             {

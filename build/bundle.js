@@ -157,8 +157,6 @@ var SpectrumAnalyzer3dRenderer = function(app)
             // requestAnimationFrame( this.render.bind(this) );
             var timer = 0.0001 * Date.now();
 
-            console.log(values.length);
-
             var value;
             for ( var i = 0; i < this.cubes.length; i++ )
             {
@@ -251,22 +249,7 @@ var SpectrumAnalyzer = function()
 
         // this.hideNav();
         document.querySelector('input').addEventListener('keyup', e => {
-
-            // Validate URL
-            const url = e.currentTarget.value;
-
-            // TODO: Reduce suckitude and combine with other logic!
-            if (url.indexOf('http') > -1) {
-                console.log('Validate URL:', url);
-                this.loadSongFromSC(url);
-
-                // Green border
-            } else {
-                // Invalid URL
-
-                // No border
-            }
-
+            this.loadSongFromSC(e.currentTarget.value);
         });
 
 
@@ -388,6 +371,7 @@ var SpectrumAnalyzer = function()
 
         this.updateStatus('Loading...');
 
+        // This is good
         var data = e.dataTransfer || e.originalEvent.dataTransfer;
         if ( data.files.length > 0
                 && data.files[0].name.indexOf( '.mp3' ) > -1
@@ -399,9 +383,11 @@ var SpectrumAnalyzer = function()
             this.updateStatus( data.files[0].name );
             this.loadSong( src );
         }
+        // This is stupid!
         else if ( data.getData("URL").indexOf('soundcloud.com') > -1 )
         {
-            this.loadSongFromSC( data.getData("URL") );
+            console.warn('Undocumented behaviour for debugging!');
+            // this.loadSongFromSC( data.getData("URL") );
         }
         else
         {
@@ -480,7 +466,9 @@ var SpectrumAnalyzer = function()
     };
 
 
-    /** Web audio **/
+
+
+    /** WEB AUDIO **/
 
     this.setupAudioNodes = function()
     {
@@ -520,12 +508,14 @@ var SpectrumAnalyzer = function()
         this.audioAnimation = requestAnimationFrame( this.update.bind(this) );
     };
 
+
+
+    /* UI */
+
     this.updateStatus = function( str )
     {
         document.querySelector('p.status').innerHTML = str;
     };
-
-
 
     this.loadSongFromClick = function(e)
     {
@@ -552,9 +542,40 @@ var SpectrumAnalyzer = function()
         }
     };
 
+
+
+    /* SoundCloud */
+
+    this.currentSource = null;
+
     // Resolve SC stream from URL
     this.loadSongFromSC = function(url)
     {
+        // Validate URL
+        //
+        // TODO: Reduce suckitude and combine with other logic!
+        if (url.indexOf('http') > -1) {
+            console.log('Validate URL:', url);
+
+            // this.loadSongFromSC(url);
+
+            // Green border
+        } else {
+            return;
+            // Invalid URL
+
+            // No border
+        }
+
+        
+        // TODO: Confirm that URL has changed
+        if (this.currentSource != url) {
+            this.currentSource = url;
+        } else {
+            console.log('URL is already set..');
+            return;
+        }
+
         // TODO: Proxy this request?
         var scClientId = 'a20b2507998bc9f8f0874f12de0efb84';
         var resolvedUrl = 'http://api.soundcloud.com/resolve.json?url=' + url + '&client_id=' + scClientId;
@@ -606,7 +627,11 @@ var SpectrumAnalyzer = function()
 
 
 
+
+
     /** Getters and setters **/
+
+    /* Current location */
 
     this.getURL = function( url )
     {
