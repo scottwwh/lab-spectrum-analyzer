@@ -59,18 +59,21 @@ nav {
 
 .col {
   flex: 1;
-  /* text-align: center; */
 }
 
-#drop-target {
-    /*
-    margin: 0;
-    background: red;
-    */
-}
 
-    #drop-target.over { border: 5px solid gold; }
-    #drop-target.over > * { pointer-events: none; }
+
+
+/* DRAG */
+
+html, body { height: 100%; padding: 0; }
+body.over::before {
+    content: '';
+    position: absolute;
+    height: calc(100% - 10px);
+    width: calc(100% - 10px);
+    border: 5px solid gold;
+}
 
 
 

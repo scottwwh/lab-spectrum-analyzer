@@ -41,7 +41,7 @@ var SpectrumAnalyzer = function()
         /* RENDERER */
 
         // TODO: Check support for WebGL and if so:
-        // this.renderer = new WebGlRenderer(this);
+        this.renderer = new WebGlRenderer(this);
 
         // Check renderer
         if (this.renderer) {
@@ -56,7 +56,7 @@ var SpectrumAnalyzer = function()
 
         /* DRAG AND DROP */
 
-        var dropTarget = document.getElementById('drop-target');
+        var dropTarget = document.querySelector('body');
         var dragEvents = 'dragenter,dragover,dragleave';
         dragEvents.split(',').forEach(e => {
             dropTarget.addEventListener(e, this.dragHandler.bind(this), false);
@@ -199,18 +199,20 @@ var SpectrumAnalyzer = function()
         }
         else if ( e.type == 'dragenter' )
         {
-            document.querySelector('#drop-target').classList.add( 'over' );
+            // document.querySelector('#drop-target').classList.add( 'over' );
+            e.currentTarget.classList.add('over');
         }
         else if ( e.type == 'dragleave' )
         {
-            document.querySelector('#drop-target').classList.remove( 'over' );
+            // document.querySelector('#drop-target').classList.remove( 'over' );
+            e.currentTarget.classList.remove('over');
         }
     };
 
     // TODO: Improve this a lot!
     this.dropHandler = function(e)
     {
-        console.log(this, e.currentTarget);
+        // console.log(this, e.currentTarget);
         e.stopPropagation();
         e.preventDefault();
 
