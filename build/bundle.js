@@ -459,6 +459,10 @@ var SpectrumAnalyzer = function()
 
     this.currentSource = null;
 
+    // TODO: Proxy this request?
+    var scClientId = 'a20b2507998bc9f8f0874f12de0efb84';
+    var resolvedUrl = 'http://api.soundcloud.com/resolve.json?url=';
+
     // Resolve SC stream from URL
     this.resolveSoundcloudURL = function(url)
     {
@@ -482,52 +486,61 @@ var SpectrumAnalyzer = function()
             return;
         }
 
-        // TODO: Proxy this request?
-        var scClientId = 'a20b2507998bc9f8f0874f12de0efb84';
-        var resolvedUrl = 'http://api.soundcloud.com/resolve.json?url=' + url + '&client_id=' + scClientId;
-
-        $.ajax({
-            url: resolvedUrl,
-            type: 'GET',
-            success: function(result)
-            {
-                // console.log(result);
-                if (result.streamable)
-                {
-                    this.updateStatus('Loading...');
-
-                    var a = document.createElement('a');
-                    a.appendChild( document.createTextNode( result.title ) );
-                    a.setAttribute( 'href', result.permalink_url );
-
-                    var el = document.querySelector('p.status');
-                    if ( el.childNodes.length > 0 )
-                        el.removeChild( el.childNodes[0] );
-
-                    el.appendChild( a );
-
-                    var songUrl = result.stream_url + '?client_id=' + scClientId;
-                    this.loadSong( songUrl );
-
-                    // Update location for linking
-                    this.setURL(url);
-
-                    document.querySelector('input').classList.remove('invalid');
-                    document.querySelector('input').classList.add('valid');
-                }
-                else
-                {
-                    console.warn("Sorry, that link can't be streamed");
-                    document.querySelector('input').classList.remove('valid');
-                    document.querySelector('input').classList.add('invalid');
-                }
-            }.bind(this),
-            error: function(err) {
-                console.warn('Error attempting to resolve URL:', err);
-                document.querySelector('input').classList.remove('valid');
-                document.querySelector('input').classList.add('invalid');
+        var request = new XMLHttpRequest();
+        request.open('GET', resolvedUrl + url + '&client_id=' + scClientId, true);
+        request.onload = function() {
+            if (request.status >= 200 && request.status < 400) {
+                // Success!
+                var data = JSON.parse(request.responseText);
+                this.onResolveSoundcloudURLSuccess(data);
+            } else {
+                // We reached our target server, but it returned an error
+                console.warn("Error?");
+                // document.querySelector('input').classList.remove('valid');
+                // document.querySelector('input').classList.add('invalid');
             }
-        });
+        }.bind(this);
+
+        request.onerror = function(err) {
+            // There was a connection error of some sort
+            console.warn('Error attempting to resolve URL:', err);
+            // document.querySelector('input').classList.remove('valid');
+            // document.querySelector('input').classList.add('invalid');
+        };
+
+        request.send();
+    };
+
+    this.onResolveSoundcloudURLSuccess = function(result) {
+        if (result.streamable)
+        {
+            this.updateStatus('Loading...');
+
+            var a = document.createElement('a');
+            a.appendChild( document.createTextNode( result.title ) );
+            a.setAttribute( 'href', result.permalink_url );
+
+            var el = document.querySelector('p.status');
+            if ( el.childNodes.length > 0 )
+                el.removeChild( el.childNodes[0] );
+
+            el.appendChild( a );
+
+            var songUrl = result.stream_url + '?client_id=' + scClientId;
+            this.loadSong( songUrl );
+
+            // Update location for linking
+            this.setURL(this.currentSource);
+
+            document.querySelector('input').classList.remove('invalid');
+            document.querySelector('input').classList.add('valid');
+        }
+        else
+        {
+            console.warn("Sorry, that link can't be streamed");
+            document.querySelector('input').classList.remove('valid');
+            document.querySelector('input').classList.add('invalid');
+        }
     };
 
 
