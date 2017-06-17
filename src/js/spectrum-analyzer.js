@@ -41,7 +41,7 @@ var SpectrumAnalyzer = function()
         /* RENDERER */
 
         // TODO: Check support for WebGL and if so:
-        this.renderer = new WebGlRenderer(this);
+        // this.renderer = new WebGlRenderer(this);
 
         // Check renderer
         if (this.renderer) {
@@ -73,7 +73,7 @@ var SpectrumAnalyzer = function()
 
         // this.hideNav();
         document.querySelector('input').addEventListener('keyup', e => {
-            this.loadSongFromSC(e.currentTarget.value);
+            this.resolveSoundcloudURL(e.currentTarget.value);
         });
 
 
@@ -84,7 +84,7 @@ var SpectrumAnalyzer = function()
         var url = this.getURL();
         if (url != null)
         {
-            this.loadSongFromSC(url);
+            this.resolveSoundcloudURL(url);
 
             // Load track now because URL will be disregarded in setURL (??)
             this.trackEvent('Load SoundCloud URL', url, null, false);
@@ -113,7 +113,7 @@ var SpectrumAnalyzer = function()
             clearTimeout(this.defaultInterval);
 
             var url = document.querySelector('.song').getAttribute('href');
-            this.loadSongFromSC(url);
+            this.resolveSoundcloudURL(url);
         }
     };
 
@@ -234,7 +234,7 @@ var SpectrumAnalyzer = function()
         else if ( data.getData("URL").indexOf('soundcloud.com') > -1 )
         {
             console.warn('Undocumented behaviour for debugging!');
-            // this.loadSongFromSC( data.getData("URL") );
+            // this.resolveSoundcloudURL( data.getData("URL") );
         }
         else
         {
@@ -267,7 +267,7 @@ var SpectrumAnalyzer = function()
     this.hashChange = function(e)
     {
         if ( e.newURL != this.getURL() )
-            this.loadSongFromSC( this.getURL(e.newURL) );
+            this.resolveSoundcloudURL( this.getURL(e.newURL) );
     };
 
 
@@ -364,7 +364,7 @@ var SpectrumAnalyzer = function()
         var path = e.currentTarget.getAttribute('href');
         if ( path.indexOf( 'soundcloud' ) > -1 )
         {
-            this.loadSongFromSC( path );
+            this.resolveSoundcloudURL( path );
         }
         else
         {
@@ -379,22 +379,17 @@ var SpectrumAnalyzer = function()
     this.currentSource = null;
 
     // Resolve SC stream from URL
-    this.loadSongFromSC = function(url)
+    this.resolveSoundcloudURL = function(url)
     {
         // Validate URL
         //
         // TODO: Reduce suckitude and combine with other logic!
-        if (url.indexOf('http') > -1) {
-            console.log('Validate URL:', url);
-
-            // this.loadSongFromSC(url);
-
-            // Green border
-        } else {
+        if (url.indexOf('https://soundcloud.com/') == -1) {
+            // Red border
             return;
-            // Invalid URL
-
-            // No border
+        } else {
+            // Green border
+            console.log('Validate URL:', url);
         }
 
         
@@ -410,16 +405,16 @@ var SpectrumAnalyzer = function()
         var scClientId = 'a20b2507998bc9f8f0874f12de0efb84';
         var resolvedUrl = 'http://api.soundcloud.com/resolve.json?url=' + url + '&client_id=' + scClientId;
 
-        this.updateStatus('Loading...');
-
         $.ajax({
             url: resolvedUrl,
             type: 'GET',
-            success: function( result )
+            success: function(result)
             {
-                // console.log( result );
-                if ( result.streamable )
+                // console.log(result);
+                if (result.streamable)
                 {
+                    this.updateStatus('Loading...');
+
                     var a = document.createElement('a');
                     a.appendChild( document.createTextNode( result.title ) );
                     a.setAttribute( 'href', result.permalink_url );
@@ -434,18 +429,30 @@ var SpectrumAnalyzer = function()
                     this.loadSong( songUrl );
 
                     // Update location for linking
-                    this.setURL( url );
+                    this.setURL(url);
+
+                    document.querySelector('input').classList.remove('invalid');
+                    document.querySelector('input').classList.add('valid');
                 }
                 else
                 {
-                    alert( "Sorry, that link can't be streamed" );
+                    console.warn("Sorry, that link can't be streamed");
+                    document.querySelector('input').classList.remove('valid');
+                    document.querySelector('input').classList.add('invalid');
                 }
             }.bind(this),
-            error: function( data ) {
-                alert( "Sorry, that link couldn't be streamed.." );
+            error: function(err) {
+                console.warn('Error attempting to resolve URL:', err);
+                document.querySelector('input').classList.remove('valid');
+                document.querySelector('input').classList.add('invalid');
             }
         });
     };
+
+
+
+
+    /* AUDIO */
 
     // Load an alreadu-resolved SC URL
     this.loadSong = function(url)
