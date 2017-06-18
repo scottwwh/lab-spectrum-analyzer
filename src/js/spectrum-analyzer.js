@@ -41,7 +41,7 @@ var SpectrumAnalyzer = function()
         /* RENDERER */
 
         // TODO: Check support for WebGL and if so:
-        // this.renderer = new WebGlRenderer(this);
+        this.renderer = new WebGlRenderer(this);
 
         // Check renderer
         if (this.renderer) {

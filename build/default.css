@@ -23,7 +23,7 @@ input {
     padding-left: 1.75rem;
     border: 2px solid transparent;
     width: 0;
-    
+
     background-color: transparent;
     background: url(img/search.svg) no-repeat;
     background-size: auto 50%;
@@ -40,7 +40,7 @@ input {
 
 
     input.valid {
-        border-color: green;
+        /* border-color: green; */
     }
 
     input.invalid {
