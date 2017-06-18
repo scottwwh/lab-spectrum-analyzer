@@ -14,15 +14,30 @@ a {
     a:hover { text-decoration: none; }
 
 audio {
-     width: 100%;
-     max-width: 400px;
+     /* width: 100%; */
 }
 
 input {
-     font-size: 1.5rem;
-     padding: 1rem;
-     border: 2px solid transparent;
+    font-size: 1.5rem;
+    padding: 1rem;
+    padding-left: 1.75rem;
+    border: 2px solid transparent;
+    width: 0;
+    
+    background-color: transparent;
+    background: url(img/search.svg) no-repeat;
+    background-size: auto 50%;
+    background-position: 0.5rem;
+
+    transition: all 0.25s;
 }
+    input:focus {
+        padding-left: 2.5rem;
+        width: auto;
+
+        background-color: #eee;
+    }
+
 
     input.valid {
         border-color: green;
@@ -57,7 +72,7 @@ canvas#colourTable { right: 0; display: none; }
 nav {
     transition: opacity 0.5s;
     padding: 1rem;
-    background: gray;
+    /* background: gray; */
 }
     nav.hide { opacity: 0; }
 
