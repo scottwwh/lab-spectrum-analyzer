@@ -8,12 +8,16 @@ import WebGlRenderer from './renderers/WebGlRenderer';
  */
 var SpectrumAnalyzer = function()
 {
+    this.WIDTH = window.innerWidth;
+    this.HEIGHT = window.innerHeight;
+
+    /* Audio */
+
     this.audio;
     this.audioContext;
     this.audioAnimation;
     this.sourceNode;
     this.analyser;
-
     this.supportsWebAudio = false;
     this.fftSize = 256;
 
@@ -48,7 +52,7 @@ var SpectrumAnalyzer = function()
             console.log('Found renderer', this.renderer);
         } else {
             console.warn('No renderer set, fall back to default');
-            this.renderer = new DefaultRenderer();
+            this.renderer = new DefaultRenderer(this);
         }
 
         this.renderer.init();
@@ -254,11 +258,12 @@ var SpectrumAnalyzer = function()
 
     this.resize = function(e)
     {
-        var WIDTH = window.innerWidth;
-        var HEIGHT = window.innerHeight;
+        this.WIDTH = window.innerWidth;
+        this.HEIGHT = window.innerHeight;
 
         if (this.renderer) {
-            this.renderer.resize( WIDTH, HEIGHT );
+            // console.log('Resize to ' + this.WIDTH, this.HEIGHT);
+            this.renderer.resize();
         } else {
             console.warn('No renderer set');
         }

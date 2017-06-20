@@ -1,14 +1,13 @@
 (function () {
 'use strict';
 
-var SpectrumAnalyzerDefaultRenderer = function()
+var DefaultRenderer = function(app)
 {
-    var WIDTH = window.innerWidth;
-    var HEIGHT = window.innerHeight;
+    var app = app;
 
     var canvas = document.getElementById('songcanvas');
-    canvas.width = WIDTH;
-    canvas.height = HEIGHT;
+    canvas.width = app.WIDTH;
+    canvas.height = app.HEIGHT;
 
     var canvasContext = canvas.getContext("2d");
     var colours = document.getElementById('colourTable');
@@ -61,7 +60,7 @@ var SpectrumAnalyzerDefaultRenderer = function()
         var value;
         var x, y, sy;
 
-        canvasContext.clearRect(0, 0, WIDTH, HEIGHT);
+        canvasContext.clearRect(0, 0, app.WIDTH, app.HEIGHT);
         for ( var i = 0, len = values.length; i < len; i++ )
         {
             value = values[i] * canvas.width;
@@ -74,25 +73,25 @@ var SpectrumAnalyzerDefaultRenderer = function()
         }
     };
 
-    this.resize = function( w, h )
+    this.resize = function()
     {
-        canvas.setAttribute( 'height', h );
-        canvas.setAttribute( 'width', w );
+        canvas.setAttribute('height', app.HEIGHT);
+        canvas.setAttribute('width', app.WIDTH);
 
-        canvas.height = h;
-        canvas.width = w;
+        canvas.height = app.HEIGHT;
+        canvas.width = app.WIDTH;
     };
 };
 
 var SpectrumAnalyzer3dRenderer = function(app)
     {
         var app = app;
-        var WIDTH = window.innerWidth;
-        var HEIGHT = window.innerHeight;
+        // var WIDTH = window.innerWidth;
+        // var HEIGHT = window.innerHeight;
 
         var canvas = document.getElementById('songcanvas');
-        canvas.width = WIDTH;
-        canvas.height = HEIGHT;
+        canvas.width = app.WIDTH;
+        canvas.height = app.HEIGHT;
 
 
         this.cubes = [];
@@ -108,53 +107,49 @@ var SpectrumAnalyzer3dRenderer = function(app)
 
             var light = new THREE.PointLight( 0xffffff, 1 );
             // light.intensity = 100;
-            // light.position.y = 250;
+            light.position.y = 500;
 
-            this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
-            this.camera.position.z = 1000;
+            this.camera = new THREE.PerspectiveCamera( 75, app.WIDTH / app.HEIGHT, 1, 10000 );
+            this.camera.position.y = 500;
 
-            var max = app.fftSize * 0.5;
-            var row, col, len = Math.floor(Math.sqrt(max)), increm = 100;
-            console.log(len);
-            for ( var i = 0; i < max; i++ )
+            // Despite the count being correct, I'm only seeing 16x8 cubes?
+            var max = app.fftSize; // * 0.5;
+            var row, col,
+                len = Math.floor(Math.sqrt(max)),
+                d = 100, // Distance
+                offsetX = len * 0.5 * d * -0.5,
+                offsetZ = len * d * -0.5;
+
+            // console.log(max, len);
+            for (var i = 0; i < max; i++)
             {
+                // console.log(i);
                 col = i % len;
-                row = Math.floor( i / len );
-                // console.log(col,row);
+                row = Math.floor(i / len);
+                // console.log(row, col);
 
                 var geometry = new THREE.BoxGeometry( 75, 75, 75 );
-                // material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
                 var material = new THREE.MeshLambertMaterial( { color: 0xff0000, transparent: true, shading: THREE.FlatShading } );
                 material.opacity = 0.5;
 
                 var mesh = new THREE.Mesh( geometry, material );
-                mesh.position.x = row * increm - ( len * increm * 0.5 );
-                mesh.position.y = -500;
-                mesh.position.z = col * increm - ( len * increm * 0.5 );
+                mesh.position.x = row * d + offsetX;
+                mesh.position.y = 0; // Math.random() * 100 - 50;
+                mesh.position.z = col * d + offsetZ;
 
                 this.scene.add( mesh );
-
                 this.cubes.push( mesh );
             }
-            console.log(this.cubes.length,app.fftSize);
+            // console.log(this.cubes.length, app.fftSize);
 
             this.scene.add( light );
-            // scene.add( new THREE.AmbientLight( 0x00ff00 ) );
 
             this.renderer = new THREE.WebGLRenderer( { canvas: canvas } );
-            this.renderer.setSize( window.innerWidth, window.innerHeight );
-
-
-            // document.body.appendChild( renderer.domElement );
-            // var blar = app.fftSize;
-
-            // this.render();
+            this.renderer.setSize(app.WIDTH, app.HEIGHT);
         };
 
-        // this.render = function( values )
-        this.render = function( values )
+        this.render = function(values)
         {
-            // requestAnimationFrame( this.render.bind(this) );
             var timer = 0.0001 * Date.now();
 
             var value;
@@ -162,9 +157,7 @@ var SpectrumAnalyzer3dRenderer = function(app)
             {
                 value = values[i] * Math.PI;
                 this.cubes[i].scale.y = value * 2 + 0.5;
-                // this.cubes[i].rotation.x = value;
                 this.cubes[i].rotation.y = value;
-                // this.cubes[i].rotation.z = value;
             }
 
             this.camera.position.x = Math.cos( timer ) * 1000;
@@ -174,27 +167,23 @@ var SpectrumAnalyzer3dRenderer = function(app)
             this.renderer.render( this.scene, this.camera );
         };
 
-        this.resize = function( w, h )
-        {
-            canvas.setAttribute( 'height', h );
-            canvas.setAttribute( 'width', w );
-
-            canvas.height = h;
-            canvas.width = w;
+        this.resize = function() {
+            this.renderer.setSize(app.WIDTH, app.HEIGHT);
         };
     };
 
-/**
- * App logic
- */
 var SpectrumAnalyzer = function()
 {
+    this.WIDTH = window.innerWidth;
+    this.HEIGHT = window.innerHeight;
+
+    /* Audio */
+
     this.audio;
     this.audioContext;
     this.audioAnimation;
     this.sourceNode;
     this.analyser;
-
     this.supportsWebAudio = false;
     this.fftSize = 256;
 
@@ -229,7 +218,7 @@ var SpectrumAnalyzer = function()
             console.log('Found renderer', this.renderer);
         } else {
             console.warn('No renderer set, fall back to default');
-            this.renderer = new SpectrumAnalyzerDefaultRenderer();
+            this.renderer = new DefaultRenderer(this);
         }
 
         this.renderer.init();
@@ -435,11 +424,12 @@ var SpectrumAnalyzer = function()
 
     this.resize = function(e)
     {
-        var WIDTH = window.innerWidth;
-        var HEIGHT = window.innerHeight;
+        this.WIDTH = window.innerWidth;
+        this.HEIGHT = window.innerHeight;
 
         if (this.renderer) {
-            this.renderer.resize( WIDTH, HEIGHT );
+            // console.log('Resize to ' + this.WIDTH, this.HEIGHT);
+            this.renderer.resize();
         } else {
             console.warn('No renderer set');
         }

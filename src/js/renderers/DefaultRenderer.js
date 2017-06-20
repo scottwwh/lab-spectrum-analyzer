@@ -1,12 +1,11 @@
 
-var SpectrumAnalyzerDefaultRenderer = function()
+var DefaultRenderer = function(app)
 {
-    var WIDTH = window.innerWidth;
-    var HEIGHT = window.innerHeight;
+    var app = app;
 
     var canvas = document.getElementById('songcanvas');
-    canvas.width = WIDTH;
-    canvas.height = HEIGHT;
+    canvas.width = app.WIDTH;
+    canvas.height = app.HEIGHT;
 
     var canvasContext = canvas.getContext("2d");
     var colours = document.getElementById('colourTable');
@@ -59,7 +58,7 @@ var SpectrumAnalyzerDefaultRenderer = function()
         var value;
         var x, y, sy;
 
-        canvasContext.clearRect(0, 0, WIDTH, HEIGHT);
+        canvasContext.clearRect(0, 0, app.WIDTH, app.HEIGHT);
         for ( var i = 0, len = values.length; i < len; i++ )
         {
             value = values[i] * canvas.width;
@@ -72,14 +71,14 @@ var SpectrumAnalyzerDefaultRenderer = function()
         }
     };
 
-    this.resize = function( w, h )
+    this.resize = function()
     {
-        canvas.setAttribute( 'height', h );
-        canvas.setAttribute( 'width', w );
+        canvas.setAttribute('height', app.HEIGHT);
+        canvas.setAttribute('width', app.WIDTH);
 
-        canvas.height = h;
-        canvas.width = w;
+        canvas.height = app.HEIGHT;
+        canvas.width = app.WIDTH;
     }
 };
 
-export default SpectrumAnalyzerDefaultRenderer;
+export default DefaultRenderer;
