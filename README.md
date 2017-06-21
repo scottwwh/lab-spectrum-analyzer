@@ -19,16 +19,16 @@ Node 6.x LTS
 
 ## TODO
 
-- THREE.js modules from Bower or NPM
+- Minify, baby!
 - Babel to transpile down to ES5
 - Gulp to automate ??
-- Remove drag/drop nonsense for SC URLs that I originally added
-- [BUG] Fallback for IE/etc/whatever
-- [BUG[ Compatibility for Firefox's WebAudio limitation
+- [BUG] Fallback for IE/etc/whatever?
 - [NTH] Show loader
 - [NTH] Show when song is over / timeline for completion
 - Improve 3D renderer
 - Move WebAudio logic into library
+- [DONE] Replace drag/drop nonsense for SC URLs with search bar
+- [DONE] THREE.js modules from NPM
 - [DONE] Rollup to modularize code
 - [DONE] Add text input for SoundCloud URLs
 

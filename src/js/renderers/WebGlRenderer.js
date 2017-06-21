@@ -1,4 +1,7 @@
 
+import * as THREE from 'three';
+
+
     var SpectrumAnalyzer3dRenderer = function(app)
     {
         var app = app;
