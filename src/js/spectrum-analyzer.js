@@ -141,6 +141,10 @@ var SpectrumAnalyzer = function()
             return;
         }
 
+        if ( this.supportsWebAudio ) {
+            this.setupAudioNodes();
+        }
+
         this.audio.addEventListener("canplay", this.audioHandler.bind(this), false );
         this.audio.addEventListener("playing", this.audioHandler.bind(this), false );
         this.audio.addEventListener("timeupdate", this.audioHandler.bind(this), false );
@@ -164,27 +168,26 @@ var SpectrumAnalyzer = function()
 
         if (e.type == 'canplay')
         {
-            // Hide loading graphic
+            this.audio.play();
 
-            if ( this.supportsWebAudio )
-            {
-                cancelAnimationFrame( this.audioAnimation );
-                this.setupAudioNodes();
-            }
-            else
-            {
-                this.audio.play();
+            if ( this.supportsWebAudio ) {
+                this.update();
             }
         }
         else if (e.type == 'playing')
         {
-            // console.log( "Playing a duration of", this.audio.duration );
+            if ( this.supportsWebAudio ) {
+                // This works but animation jumps when resumed..
+                // this.update();
+            }
         }
         else if (e.type == 'timeupdate')
         {
         }
         else if (e.type == 'pause')
         {
+            // This works but animation jumps when resumed
+            // cancelAnimationFrame( this.audioAnimation );
         }
         else if (e.type == 'play')
         {
@@ -318,10 +321,6 @@ var SpectrumAnalyzer = function()
         this.sourceNode = (this.sourceNode || this.audioContext.createMediaElementSource(this.audio));
         this.sourceNode.connect(this.analyser);
         this.sourceNode.connect(this.audioContext.destination);
-
-        this.audio.play();
-
-        this.update();
     };
 
     this.update = function()
@@ -475,7 +474,8 @@ var SpectrumAnalyzer = function()
     // Load an alreadu-resolved SC URL
     this.loadSong = function(url)
     {
-        if (this.sourceNode) this.sourceNode.disconnect();
+        // TODO: Is this necessary?
+        // if (this.sourceNode) this.sourceNode.disconnect();
 
         this.audio.src = url;
     };
