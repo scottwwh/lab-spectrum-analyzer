@@ -29,15 +29,14 @@ import * as THREE from 'three';
             light.position.y = 500;
 
             this.camera = new THREE.PerspectiveCamera( 75, app.WIDTH / app.HEIGHT, 1, 10000 );
-            this.camera.position.y = 500;
+            this.camera.position.y = 750;
 
             // frequencyBinCount may not be available when renderer is initialized, and is always  half of fftSize
             var max = app.fftSize * 0.5;
             var row, col,
                 len = Math.floor(Math.sqrt(max)),
                 d = 100, // Distance
-                offsetX = len * 0.5 * d * -0.5,
-                offsetZ = len * d * -0.5;
+                offset = len * d * -0.5;
 
             // console.log(max, len);
             for (var i = 0; i < max; i++)
@@ -52,9 +51,9 @@ import * as THREE from 'three';
                 material.opacity = 0.5;
 
                 var mesh = new THREE.Mesh( geometry, material );
-                mesh.position.x = row * d + offsetX;
+                mesh.position.x = row * d + offset;
                 mesh.position.y = 0; // Math.random() * 100 - 50;
-                mesh.position.z = col * d + offsetZ;
+                mesh.position.z = col * d + offset;
 
                 this.scene.add( mesh );
                 this.cubes.push( mesh );
@@ -79,8 +78,8 @@ import * as THREE from 'three';
                 this.cubes[i].rotation.y = value;
             }
 
-            this.camera.position.x = Math.cos( timer ) * 1000;
-            this.camera.position.z = Math.sin( timer ) * 1000;
+            this.camera.position.x = Math.cos( timer ) * 1500;
+            this.camera.position.z = Math.sin( timer ) * 1500;
             this.camera.lookAt( this.scene.position );
 
             this.renderer.render( this.scene, this.camera );
