@@ -31,8 +31,8 @@ import * as THREE from 'three';
             this.camera = new THREE.PerspectiveCamera( 75, app.WIDTH / app.HEIGHT, 1, 10000 );
             this.camera.position.y = 500;
 
-            // Despite the count being correct, I'm only seeing 16x8 cubes?
-            var max = app.fftSize; // * 0.5;
+            // frequencyBinCount may not be available when renderer is initialized, and is always  half of fftSize
+            var max = app.fftSize * 0.5;
             var row, col,
                 len = Math.floor(Math.sqrt(max)),
                 d = 100, // Distance

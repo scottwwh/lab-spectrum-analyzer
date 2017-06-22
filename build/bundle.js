@@ -41633,8 +41633,8 @@ var SpectrumAnalyzer3dRenderer = function(app)
             this.camera = new PerspectiveCamera( 75, app.WIDTH / app.HEIGHT, 1, 10000 );
             this.camera.position.y = 500;
 
-            // Despite the count being correct, I'm only seeing 16x8 cubes?
-            var max = app.fftSize; // * 0.5;
+            // frequencyBinCount may not be available when renderer is initialized, and is always  half of fftSize
+            var max = app.fftSize * 0.5;
             var row, col,
                 len = Math.floor(Math.sqrt(max)),
                 d = 100, // Distance
@@ -41709,7 +41709,7 @@ var SpectrumAnalyzer = function()
     this.sourceNode;
     this.analyser;
     this.supportsWebAudio = false;
-    this.fftSize = 256;
+    this.fftSize = 512;
 
     // Set to 'new <renderer>()' from /renderers
     this.renderer = null;
@@ -41850,6 +41850,9 @@ var SpectrumAnalyzer = function()
     };
 
 
+
+
+
     /** Event handlers **/
 
     this.audioHandler = function(e)
@@ -41884,6 +41887,35 @@ var SpectrumAnalyzer = function()
         }
     };
 
+    /** WEB AUDIO **/
+
+    this.frequencyBinCount;
+
+    this.setupAudioNodes = function()
+    {
+        this.analyser = (this.analyser || this.audioContext.createAnalyser());
+        this.analyser.smoothingTimeConstant = 0.25; // 0.7;
+        this.analyser.fftSize = this.fftSize;
+
+        // Initial reference
+        this.frequencyBinCount = new Uint8Array(this.analyser.frequencyBinCount);
+        this.analyser.getByteFrequencyData(this.frequencyBinCount); // This might break?
+
+        // Firefox used to fail silently at this point
+        // Ref: https://bugzilla.mozilla.org/show_bug.cgi?id=937718
+        //
+        // Triggers error in Chrome when seeking position via media UI
+        this.sourceNode = (this.sourceNode || this.audioContext.createMediaElementSource(this.audio));
+        this.sourceNode.connect(this.analyser);
+        this.sourceNode.connect(this.audioContext.destination);
+    };
+
+
+
+
+
+
+    /* UI */
 
     // Combine with dropHandler ?
     this.dragHandler = function(e)
@@ -41896,12 +41928,10 @@ var SpectrumAnalyzer = function()
         }
         else if ( e.type == 'dragenter' )
         {
-            // document.querySelector('#drop-target').classList.add( 'over' );
             e.currentTarget.classList.add('over');
         }
         else if ( e.type == 'dragleave' )
         {
-            // document.querySelector('#drop-target').classList.remove( 'over' );
             e.currentTarget.classList.remove('over');
         }
     };
@@ -41962,15 +41992,6 @@ var SpectrumAnalyzer = function()
         }
     };
 
-    this.hashChange = function(e)
-    {
-        if ( e.newURL != this.getURL() )
-            this.resolveSoundcloudURL( this.getURL(e.newURL) );
-    };
-
-
-    /** Nav **/
-
     this.showNav = function()
     {
         var els = document.querySelectorAll('nav');
@@ -41996,35 +42017,16 @@ var SpectrumAnalyzer = function()
 
 
 
-    /** WEB AUDIO **/
-
-    this.setupAudioNodes = function()
-    {
-        this.analyser = (this.analyser || this.audioContext.createAnalyser());
-        this.analyser.smoothingTimeConstant = 0.25; // 0.7;
-        this.analyser.fftSize = this.fftSize;
-
-        // Firefox used to fail silently at this point
-        // Ref: https://bugzilla.mozilla.org/show_bug.cgi?id=937718
-        //
-        // Triggers error in Chrome when seeking position via media UI
-        this.sourceNode = (this.sourceNode || this.audioContext.createMediaElementSource(this.audio));
-        this.sourceNode.connect(this.analyser);
-        this.sourceNode.connect(this.audioContext.destination);
-    };
 
     this.update = function()
     {
-        // console.log('update');
-
-        var array =  new Uint8Array(this.analyser.frequencyBinCount);
-        this.analyser.getByteFrequencyData(array);
+        this.analyser.getByteFrequencyData(this.frequencyBinCount);
 
         // Normalize values to 0-1
         var values = [];
-        for ( var i = 0; i < (array.length); i++ )
+        for ( var i = 0; i < (this.frequencyBinCount.length); i++ )
         {
-            values[ i ] = array[ i ] / 255;
+            values[ i ] = this.frequencyBinCount[ i ] / 255;
         }
 
         this.renderer.render( values );
@@ -42174,9 +42176,13 @@ var SpectrumAnalyzer = function()
 
 
 
-    /** Getters and setters **/
+    /* ROUTER */
 
-    /* Current location */
+    this.hashChange = function(e)
+    {
+        if ( e.newURL != this.getURL() )
+            this.resolveSoundcloudURL( this.getURL(e.newURL) );
+    };
 
     this.getURL = function( url )
     {
