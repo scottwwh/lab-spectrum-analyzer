@@ -476,7 +476,9 @@ var SpectrumAnalyzer = function()
     // Load an alreadu-resolved SC URL
     this.loadSong = function(url)
     {
-        // TODO: Is this necessary?
+        // Prevent a memory leak/performance hit?
+        //
+        // This prevents playback?
         // if (this.sourceNode) this.sourceNode.disconnect();
 
         this.audio.src = url;

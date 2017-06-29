@@ -8,7 +8,8 @@ export default {
   plugins: [
     resolve({
       module: true,
-      modulesOnly: true
+      modulesOnly: true,
+      jsnext: true
     })
   ],
   dest: 'build/bundle.js' // equivalent to --output

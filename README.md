@@ -20,8 +20,9 @@ Node 6.x LTS
 ## TODO
 
 - Minify, baby!
-- Babel to transpile down to ES5
-- Gulp to automate ??
+- Fnd/fix performance problem after changing source a bunch of times
+- Babel to transpile down to ES5?
+- Gulp to automate?
 - [BUG] Fallback for IE/etc/whatever?
 - [NTH] Show loader
 - [NTH] Show when song is over / timeline for completion
