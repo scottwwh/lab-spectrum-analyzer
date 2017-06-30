@@ -4,141 +4,130 @@
 // import * as OrbitControls from 'three/examples/js/controls/OrbitControls';
 
 // TODO: Figure out why we're still pulling in all modules?
-import {Scene, PointLight, PerspectiveCamera, BoxGeometry, MeshLambertMaterial, Mesh, FlatShading, WebGLRenderer} from 'three';
-
-// Remove namespace
-let THREE = {};
-THREE.Scene = Scene;
-THREE.PointLight = PointLight;
-THREE.PerspectiveCamera = PerspectiveCamera;
-THREE.BoxGeometry = BoxGeometry;
-THREE.MeshLambertMaterial = MeshLambertMaterial;
-THREE.Mesh = Mesh;
-THREE.FlatShading = FlatShading;
-THREE.WebGLRenderer = WebGLRenderer;
+// import { Scene, PointLight, PerspectiveCamera, BoxGeometry, MeshLambertMaterial, Mesh, FlatShading, WebGLRenderer } from 'three/build/three.modules';
+import * as THREE from 'three';
 
 
-    var SpectrumAnalyzer3dRenderer = function(app)
+
+var SpectrumAnalyzer3dRenderer = function(app)
+{
+    var app = app;
+    // var WIDTH = window.innerWidth;
+    // var HEIGHT = window.innerHeight;
+
+    var canvas = document.getElementById('songcanvas');
+    canvas.width = app.WIDTH;
+    canvas.height = app.HEIGHT;
+
+
+    this.cubes = [];
+    this.scene;
+    this.camera;
+    this.renderer;
+
+
+    // Loop keeps playing even when no sound
+    this.init = function()
     {
-        var app = app;
-        // var WIDTH = window.innerWidth;
-        // var HEIGHT = window.innerHeight;
+        // document.addEventListener( 'mousemove', this.onMouseMove );
 
-        var canvas = document.getElementById('songcanvas');
-        canvas.width = app.WIDTH;
-        canvas.height = app.HEIGHT;
+        
+        this.scene = new THREE.Scene();
 
+        var light = new THREE.PointLight( 0xffffff, 1 );
+        // light.intensity = 100;
+        light.position.y = 500;
 
-        this.cubes = [];
-        this.scene;
-        this.camera;
-        this.renderer;
+        this.camera = new THREE.PerspectiveCamera( 75, app.WIDTH / app.HEIGHT, 1, 10000 );
+        this.camera.position.y = 1500;
 
+        // frequencyBinCount may not be available when renderer is initialized, and is always  half of fftSize
+        var max = app.fftSize * 0.5;
+        var row, col,
+            len = Math.floor(Math.sqrt(max)),
+            d = 100, // Distance
+            offset = len * d * -0.5;
 
-        // Loop keeps playing even when no sound
-        this.init = function()
+        // console.log(max, len);
+        for (var i = 0; i < max; i++)
         {
-            // document.addEventListener( 'mousemove', this.onMouseMove );
+            // console.log(i);
+            col = i % len;
+            row = Math.floor(i / len);
+            // console.log(row, col);
 
-            
-            this.scene = new THREE.Scene();
+            var geometry = new THREE.BoxGeometry( 75, 75, 75 );
+            var material = new THREE.MeshLambertMaterial( { color: 0xff0000, transparent: true, shading: THREE.FlatShading } );
+            material.opacity = 0.5;
 
-            var light = new THREE.PointLight( 0xffffff, 1 );
-            // light.intensity = 100;
-            light.position.y = 500;
+            var mesh = new THREE.Mesh( geometry, material );
+            mesh.position.x = row * d + offset;
+            mesh.position.y = 0; // Math.random() * 100 - 50;
+            mesh.position.z = col * d + offset;
 
-            this.camera = new THREE.PerspectiveCamera( 75, app.WIDTH / app.HEIGHT, 1, 10000 );
-            this.camera.position.y = 1500;
-
-            // frequencyBinCount may not be available when renderer is initialized, and is always  half of fftSize
-            var max = app.fftSize * 0.5;
-            var row, col,
-                len = Math.floor(Math.sqrt(max)),
-                d = 100, // Distance
-                offset = len * d * -0.5;
-
-            // console.log(max, len);
-            for (var i = 0; i < max; i++)
-            {
-                // console.log(i);
-                col = i % len;
-                row = Math.floor(i / len);
-                // console.log(row, col);
-
-                var geometry = new THREE.BoxGeometry( 75, 75, 75 );
-                var material = new THREE.MeshLambertMaterial( { color: 0xff0000, transparent: true, shading: THREE.FlatShading } );
-                material.opacity = 0.5;
-
-                var mesh = new THREE.Mesh( geometry, material );
-                mesh.position.x = row * d + offset;
-                mesh.position.y = 0; // Math.random() * 100 - 50;
-                mesh.position.z = col * d + offset;
-
-                this.scene.add( mesh );
-                this.cubes.push( mesh );
-            }
-            // console.log(this.cubes.length, app.fftSize);
-
-            this.scene.add( light );
-
-            this.renderer = new THREE.WebGLRenderer( { canvas: canvas } );
-            this.renderer.setSize(app.WIDTH, app.HEIGHT);
-
-            /*
-            controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
-            controls.addEventListener( 'change', this.render ); // remove when using animation loop
-            // enable animation loop when using damping or autorotation
-            //controls.enableDamping = true;
-            //controls.dampingFactor = 0.25;
-            controls.enableZoom = false;
-            */
-        };
-
-        // var controls;
-
-        this.render = function(values)
-        {
-            var timer = 0.0001 * Date.now();
-
-            var value;
-            for ( var i = 0; i < this.cubes.length; i++ )
-            {
-                value = values[i] * Math.PI;
-                this.cubes[i].scale.y = value * 2 + 0.5;
-                this.cubes[i].rotation.y = value;
-            }
-
-
-
-            // Works, suckily
-            // this.camera.position.x = mouseX + 1000;
-
-            // this.camera.position.x += ( mouseX - this.camera.position.x ) * 0.025;
-            // this.camera.position.y += ( mouseY - this.camera.position.y ) * 0.025;
-            // camera.position.z = particles.geometry.vertices[ pos ].position.z + 300;
-
-
-            // this.camera.position.x = Math.cos( timer ) * 1500;
-            // this.camera.position.z = Math.sin( timer ) * 1500;
-            this.camera.lookAt( this.scene.position );
-
-            this.renderer.render( this.scene, this.camera );
-        };
-
-        this.resize = function() {
-            this.renderer.setSize(app.WIDTH, app.HEIGHT);
+            this.scene.add( mesh );
+            this.cubes.push( mesh );
         }
+        // console.log(this.cubes.length, app.fftSize);
 
+        this.scene.add( light );
 
-        var mouseX; // = event.clientX - windowHalfX;
-        var mouseY; // = event.clientY - windowHalfY;
+        this.renderer = new THREE.WebGLRenderer( { canvas: canvas } );
+        this.renderer.setSize(app.WIDTH, app.HEIGHT);
 
-        this.onMouseMove = function( event ) {
-            var windowHalfX = window.innerWidth / 2;
-            var windowHalfY = window.innerHeight / 2;
-            mouseX = event.clientX - windowHalfX;
-            mouseY = event.clientY - windowHalfY;
-        }
+        // controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
+        // controls.addEventListener( 'change', this.render ); // remove when using animation loop
+        // enable animation loop when using damping or autorotation
+        // controls.enableDamping = true;
+        // controls.dampingFactor = 0.25;
+        // controls.enableZoom = false;
     };
+
+    // var controls;
+
+    this.render = function(values)
+    {
+        var timer = 0.0001 * Date.now();
+
+        var value;
+        for ( var i = 0; i < this.cubes.length; i++ )
+        {
+            value = values[i] * Math.PI;
+            this.cubes[i].scale.y = value * 2 + 0.5;
+            this.cubes[i].rotation.y = value;
+        }
+
+
+
+        // Works, suckily
+        // this.camera.position.x = mouseX + 1000;
+
+        // this.camera.position.x += ( mouseX - this.camera.position.x ) * 0.025;
+        // this.camera.position.y += ( mouseY - this.camera.position.y ) * 0.025;
+        // camera.position.z = particles.geometry.vertices[ pos ].position.z + 300;
+
+
+        // this.camera.position.x = Math.cos( timer ) * 1500;
+        // this.camera.position.z = Math.sin( timer ) * 1500;
+        this.camera.lookAt( this.scene.position );
+
+        this.renderer.render( this.scene, this.camera );
+    };
+
+    this.resize = function() {
+        this.renderer.setSize(app.WIDTH, app.HEIGHT);
+    }
+
+
+    var mouseX; // = event.clientX - windowHalfX;
+    var mouseY; // = event.clientY - windowHalfY;
+
+    this.onMouseMove = function( event ) {
+        var windowHalfX = window.innerWidth / 2;
+        var windowHalfY = window.innerHeight / 2;
+        mouseX = event.clientX - windowHalfX;
+        mouseY = event.clientY - windowHalfY;
+    }
+};
 
 export default SpectrumAnalyzer3dRenderer;
