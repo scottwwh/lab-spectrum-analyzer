@@ -117,5 +117,5 @@ body.over::before {
 
 .enabled {
     color: #fff;
-    background: gray;
+    text-decoration: none;
 }

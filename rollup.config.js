@@ -18,7 +18,6 @@ export default {
       browser: true,
     }),
 
-/*
     babel({
       // if this option is true, babel does some minification of files once they reach a certain size
       compact: false,
@@ -35,10 +34,8 @@ export default {
       iife: {
         dest: 'build/bundle.min.js',
         mangle: true,
-        // sourceMapUrl: 'localhost/out.js.map'
       }
     })
-*/
   ],
 
   dest: 'build/bundle.js' // equivalent to --output
