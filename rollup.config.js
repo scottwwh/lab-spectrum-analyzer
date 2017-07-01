@@ -18,7 +18,7 @@ export default {
       browser: true,
     }),
 
-// /*
+/*
     babel({
       // if this option is true, babel does some minification of files once they reach a certain size
       compact: false,
@@ -30,7 +30,6 @@ export default {
       babelrc: false,
       presets: ['es2015-loose-rollup'],
     }),    
-// */
 
     minify({
       iife: {
@@ -39,7 +38,7 @@ export default {
         // sourceMapUrl: 'localhost/out.js.map'
       }
     })
-
+*/
   ],
 
   dest: 'build/bundle.js' // equivalent to --output

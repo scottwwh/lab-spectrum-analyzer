@@ -19,15 +19,14 @@ Node 6.x LTS
 
 ## TODO
 
-- Minify, baby!
 - Fnd/fix performance problem after changing source a bunch of times
-- Babel to transpile down to ES5?
 - Gulp to automate?
 - [BUG] Fallback for IE/etc/whatever?
 - [NTH] Show loader
 - [NTH] Show when song is over / timeline for completion
-- Improve 3D renderer
 - Move WebAudio logic into library
+- [DONE] Minify, baby!
+- [DONE] Babel to transpile down to ES5?
 - [DONE] Replace drag/drop nonsense for SC URLs with search bar
 - [DONE] THREE.js modules from NPM
 - [DONE] Rollup to modularize code

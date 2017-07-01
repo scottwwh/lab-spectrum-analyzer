@@ -39,38 +39,64 @@ var SpectrumAnalyzer3dRenderer = function(app)
         light.position.y = 500;
 
         this.camera = new THREE.PerspectiveCamera( 75, app.WIDTH / app.HEIGHT, 1, 10000 );
-        this.camera.position.y = 1500;
 
-        // frequencyBinCount may not be available when renderer is initialized, and is always  half of fftSize
+
+        var birdsEye = false;
+
+
+        if (birdsEye) { // Bird's eye grid
+            this.camera.position.y = 1500;
+            this.camera.position.z = 10; // 1500;
+        } else {
+            this.camera.position.y = 500;
+            this.camera.position.z = 1000; // 1500;
+        }
+
+        
+
+        // frequencyBinCount may not be available when renderer is initialized, and is always half of fftSize
+        var group = new THREE.Group();
         var max = app.fftSize * 0.5;
         var row, col,
             len = Math.floor(Math.sqrt(max)),
-            d = 100, // Distance
-            offset = len * d * -0.5;
+            d = 100; // Distance
 
         // console.log(max, len);
         for (var i = 0; i < max; i++)
         {
-            // console.log(i);
             col = i % len;
             row = Math.floor(i / len);
-            // console.log(row, col);
 
             var geometry = new THREE.BoxGeometry( 75, 75, 75 );
             var material = new THREE.MeshLambertMaterial( { color: 0xff0000, transparent: true, shading: THREE.FlatShading } );
-            material.opacity = 0.5;
+            material.opacity = 0;
 
-            var mesh = new THREE.Mesh( geometry, material );
-            mesh.position.x = row * d + offset;
-            mesh.position.y = 0; // Math.random() * 100 - 50;
-            mesh.position.z = col * d + offset;
+            var mesh = new THREE.Mesh(geometry, material);
+            mesh.position.x = row * d;
+            mesh.position.y = 0;
+            mesh.position.z = col * d;
 
-            this.scene.add( mesh );
+            group.add( mesh );
+
             this.cubes.push( mesh );
         }
-        // console.log(this.cubes.length, app.fftSize);
+        this.scene.add(group);
+        this.scene.add(light);
 
-        this.scene.add( light );
+
+        var box = new THREE.Box3().setFromObject(group);
+        // console.log(box.getSize(), box.min, box.max, group.position);
+
+        if (birdsEye) {
+            group.position.x += box.getSize().x * -0.5;
+            group.position.z += box.getSize().z * 0.5;
+            group.rotation.y = Math.PI * 0.5;
+        } else {
+            group.position.x += box.getSize().x * 0.5;
+            group.position.z += box.getSize().z * -0.5;
+            group.rotation.y = Math.PI * -0.5;
+        }
+
 
         this.renderer = new THREE.WebGLRenderer( { canvas: canvas } );
         this.renderer.setSize(app.WIDTH, app.HEIGHT);
@@ -95,6 +121,7 @@ var SpectrumAnalyzer3dRenderer = function(app)
             value = values[i] * Math.PI;
             this.cubes[i].scale.y = value * 2 + 0.5;
             this.cubes[i].rotation.y = value;
+            this.cubes[i].material.opacity = values[i] * 0.75;
         }
 
 
@@ -115,6 +142,9 @@ var SpectrumAnalyzer3dRenderer = function(app)
     };
 
     this.resize = function() {
+        this.camera.aspect = app.WIDTH / app.HEIGHT;
+        this.camera.updateProjectionMatrix();
+
         this.renderer.setSize(app.WIDTH, app.HEIGHT);
     }
 
