@@ -2,7 +2,7 @@
 
 Simple way to visualize audio streams using WebAudio and WebGL (via Three.js) via local MP3s or Soundcloud URLs.
 
-Looking after this after many years, still very much a work in progress.
+Looking at this after many years, still very much a work in progress. [Demo.](http://syncretinal.com/lab/spectrum_analyzer/)
 
 Uses Node 6.x LTS.
 
