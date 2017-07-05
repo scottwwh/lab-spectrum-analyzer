@@ -15,15 +15,15 @@
   "author": "Scott Harley",
   "license": "ISC",
   "homepage": "https://bitbucket.org/scottwwh/lab-spectrum-analyzer#readme",
-  "dependencies": {},
+  "dependencies": {
+    "three": "^0.85.2"
+  },
   "devDependencies": {
     "babel-preset-es2015-loose-rollup": "^7.0.0",
-    "gulp": "^3.9.1",
     "rollup": "^0.43.0",
     "rollup-plugin-babel": "^2.7.1",
     "rollup-plugin-minify": "^1.0.3",
     "rollup-plugin-node-resolve": "^3.0.0",
-    "rollup-watch": "^4.0.0",
-    "three": "^0.85.2"
+    "rollup-watch": "^4.0.0"
   }
 }

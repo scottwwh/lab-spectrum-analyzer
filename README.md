@@ -1,30 +1,31 @@
 # Spectrum analyzer
 
-Looking after this after many years, very much WIP..
+Simple way to visualize audio streams using WebAudio and WebGL (via Three.js) via local MP3s or Soundcloud URLs.
 
-Node 6.x LTS
+Looking after this after many years, still very much a work in progress.
+
+Uses Node 6.x LTS.
 
 ## Installation
 
 ```
-# Does nothing at the moment!
-% npm install gulp --global
-
 # Important :)
 % npm i --global browser-sync
-% npm i -D rollup
+% npm install
+
+# Combine these two..
 % npm run dev
-% npm run start
+% npm run server
 ```
 
 ## TODO
 
-- Fnd/fix performance problem after changing source a bunch of times
-- Gulp to automate?
+- Streamline build process
+- Fnd/fix performance problem after repeated play/pause events
+- Move WebAudio logic into library
 - [BUG] Fallback for IE/etc/whatever?
 - [NTH] Show loader
 - [NTH] Show when song is over / timeline for completion
-- Move WebAudio logic into library
 - [DONE] Minify, baby!
 - [DONE] Babel to transpile down to ES5?
 - [DONE] Replace drag/drop nonsense for SC URLs with search bar
@@ -33,7 +34,7 @@ Node 6.x LTS
 - [DONE] Add text input for SoundCloud URLs
 
 
-## Reference
+## Old notes
 
 Reference:
 
@@ -48,32 +49,9 @@ Reference:
 - HTML5 audio: http://html5doctor.com/html5-audio-the-state-of-play/
 - HTML5 audio format test: http://hpr.dogphilosophy.net/test/
 
-Examples:
+Useful examples:
 
 - http://0xfe.muthanna.com/wavebox/
 - Most useful sample code: http://jsbin.com/acolet/1
     - Written by this guy: http://stackoverflow.com/users/1397319/idbehold
-- Referenced most useful: http://blog.arisetyo.com/create-spectrum-analyzers-using-webkitaudiocontext/
-
-
-
-
-// Pseudo
-
-if ( ! audio || ! canvas )
-{
-    show error message, nothing doing
-}
-else
-{
-    load/play audio
-
-    if ( audioContext )
-    {
-        spectrum analyzer
-    }
-    else
-    {
-        graphics based on waveform
-    }
-}
+- http://blog.arisetyo.com/create-spectrum-analyzers-using-webkitaudiocontext/
