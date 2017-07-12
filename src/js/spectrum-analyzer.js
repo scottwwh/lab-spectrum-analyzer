@@ -26,8 +26,14 @@ var SpectrumAnalyzer = function()
     this.timeout = null;
     this.baseURL = 'https://soundcloud.com/';
 
+    // TODO: Remove this? Default song countdown?
+    this.defaultInterval = null;
+    this.defaultTime = null;
 
-    // Initialize - and grab an SC URL?
+
+    /**
+     * Initialize - and grab an SC URL?
+     */
     this.init = function(playDefault)
     {
         // Initialize existing links
@@ -104,9 +110,10 @@ var SpectrumAnalyzer = function()
         }
     };
 
-    this.defaultInterval = null;
-    this.defaultTime = null;
 
+    /**
+     * Default song countdown
+     */
     this.initDefaultPlayback = function(time) {
         var delta = new Date().getTime() - time;
         if (delta < 5000) {
