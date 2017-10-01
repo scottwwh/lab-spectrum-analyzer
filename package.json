@@ -5,8 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "rollup -c -w",
-    "server": "browser-sync start --server --files 'build/*'"
+    "build": "rollup -c -w"
   },
   "repository": {
     "type": "git",
@@ -22,6 +21,7 @@
     "babel-preset-es2015-loose-rollup": "^7.0.0",
     "rollup": "^0.43.0",
     "rollup-plugin-babel": "^2.7.1",
+    "rollup-plugin-browsersync": "^0.2.4",
     "rollup-plugin-minify": "^1.0.3",
     "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-watch": "^4.0.0"

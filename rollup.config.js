@@ -1,6 +1,7 @@
 import resolve from 'rollup-plugin-node-resolve';
 import minify from 'rollup-plugin-minify';
 import babel from 'rollup-plugin-babel';
+import browserSync from 'rollup-plugin-browsersync';
 
 // rollup src\index.js --format iife -o bundle.js
 // rollup.config.js
@@ -35,7 +36,9 @@ export default {
         dest: 'build/bundle.min.js',
         mangle: true,
       }
-    })
+    }),
+
+    browserSync({server: 'build'})
   ],
 
   dest: 'build/bundle.js' // equivalent to --output

@@ -94,19 +94,28 @@ var SpectrumAnalyzer = function()
         var url = this.getURL();
         if (url != null)
         {
+            // /*
             this.resolveSoundcloudURL(url);
 
             // Load track now because URL will be disregarded in setURL (??)
             this.trackEvent('Load SoundCloud URL', url, null, false);
+            // */
 
         // Play default song
         } else if (playDefault) {
+            // Show a big Play button
+            /*
             this.updateStatus('Loading in 5s...');
 
             var time = new Date().getTime();
             this.defaultInterval = setInterval(function() {
                 this.initDefaultPlayback(time);
             }.bind(this), 1000);
+            */
+
+            // console.log('hi');
+            var url = document.querySelector('.song').getAttribute('href');
+            this.resolveSoundcloudURL(url);
         }
     };
 
@@ -114,6 +123,7 @@ var SpectrumAnalyzer = function()
     /**
      * Default song countdown
      */
+    /*
     this.initDefaultPlayback = function(time) {
         var delta = new Date().getTime() - time;
         if (delta < 5000) {
@@ -127,6 +137,7 @@ var SpectrumAnalyzer = function()
             this.resolveSoundcloudURL(url);
         }
     };
+    */
 
     this.initAudio = function()
     {
@@ -139,6 +150,19 @@ var SpectrumAnalyzer = function()
         this.audio = document.getElementsByTagName('audio')[0];
         this.audio.setAttribute( 'crossOrigin', 'anonymous' );
         this.audio.setAttribute( 'preload', 'auto' );
+
+        var arg = document.querySelector('#play');
+        console.log('play button', arg);
+
+        var fn = e => {
+            console.log(this, e);
+            this.audio.play();
+        };
+        document.querySelector('#play').addEventListener('click', fn);
+
+        // /*
+        // document.querySelector('#play').addEventListener('click', fn);
+        // */
 
         // Older versions of FF?
         var canPlay = !! ( this.audio.canPlayType && this.audio.canPlayType('audio/mpeg;').replace(/no/, ''));
@@ -178,11 +202,14 @@ var SpectrumAnalyzer = function()
 
         if (e.type == 'canplay')
         {
+            console.log('Show a big ass Play button!');
+            /*
             this.audio.play();
 
             if ( this.supportsWebAudio ) {
                 this.update();
             }
+            */
         }
         else if (e.type == 'playing')
         {
