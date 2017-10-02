@@ -106,7 +106,15 @@ function setupAudioNodes()
 
 function getFrequencyBinCount() {
     analyser.getByteFrequencyData(frequencyBinCount);
-    return frequencyBinCount;
+
+    // Normalize values to 0-1
+    let values = [];
+    for (let i = 0, max = frequencyBinCount.length; i < max; i++)
+    {
+        values[i] = frequencyBinCount[i] / 255;
+    }
+
+    return values;
 }
 
 function play() {
@@ -128,5 +136,5 @@ export default {
     play: play,
     loadSong: load,
     isWebAudioSupported: () => { return isWebAudioSupported },
-    getFrequencyBinCount: getFrequencyBinCount
+    getFrequencyValues: getFrequencyBinCount
 };

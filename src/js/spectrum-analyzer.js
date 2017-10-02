@@ -44,6 +44,7 @@ var SpectrumAnalyzer = function()
         const audioElement = document.querySelector('audio');
         audioElement.addEventListener('canplay', audioElementHandler.bind(this));
         audioElement.addEventListener('play', audioElementHandler.bind(this));
+        audioElement.addEventListener('pause', audioElementHandler.bind(this));
         audio.init(audioElement);
 
 
@@ -122,16 +123,23 @@ var SpectrumAnalyzer = function()
     {
         // console.log(e.type);
         if (e.type == 'canplay') {
-            console.log('Show a big ass Play button!');
+            document.querySelector('span#play').classList.remove('hide');
+        } else if (e.type == 'pause') {
+            document.querySelector('span#play').classList.remove('hide');            
         } else if (e.type == 'play') {
-            // Hide big ass Play button
+            document.querySelector('span#play').classList.add('hide');
 
             // Rely on user input to start
             if (audio.isWebAudioSupported()) {
-                console.log('Update this shit!');
                 this.update();
             }
         }
+    };
+
+    // Drive render loop while audio is playing
+    this.update = function() {
+        this.renderer.render(audio.getFrequencyValues());
+        this.audioAnimation = requestAnimationFrame(this.update.bind(this));
     };
 
 
@@ -233,26 +241,6 @@ var SpectrumAnalyzer = function()
             for ( var i = 0; i < els.length; i++ )
                 els[i].classList.add('hide');
         }, 10000 );
-    };
-
-
-
-
-
-    this.update = function()
-    {
-        const frequencyBinCount = audio.getFrequencyBinCount(); // this.analyser.getByteFrequencyData(this.frequencyBinCount);
-        // console.log(frequencyBinCount);
-
-        // Normalize values to 0-1
-        var values = [];
-        for ( var i = 0; i < (frequencyBinCount.length); i++ )
-        {
-            values[ i ] = frequencyBinCount[ i ] / 255;
-        }
-
-        this.renderer.render(values);
-        this.audioAnimation = requestAnimationFrame(this.update.bind(this));
     };
 
 

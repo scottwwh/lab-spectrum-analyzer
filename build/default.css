@@ -111,19 +111,31 @@ body.over::before {
 }
 
 
-#blar {
+#overlay {
     position: absolute;
     top: 50%;
     left: 50%;
     padding: 0 auto;
 }
 
-#blar span {
+#overlay span {
     display: inline-block;
+}
+
+span#play {
     transform: translate(-50%, -50%);
     font-size: 5rem;
     color: gold;
 }
+
+span#play:hover {
+    color: #fff;
+}
+
+span.hide {
+    display: none !important;
+}
+
 
 
 /* LINKS */
