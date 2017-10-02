@@ -1,9 +1,5 @@
-/* SoundCloud */
 
 const baseURL = 'https://soundcloud.com/';
-const currentSource = null;
-
-// TODO: Proxy this request?
 const scClientId = 'a20b2507998bc9f8f0874f12de0efb84';
 const resolvedUrl = 'http://api.soundcloud.com/resolve.json?url=';
 
@@ -15,17 +11,6 @@ function isValid(url) {
 // Resolve SC stream from URL
 function resolve(url)
 {
-    // This needs to be managed by Audio object and/or app
-    /*
-    if (this.currentSource != url) {
-        this.currentSource = url;
-    } else {
-        console.log('URL is already set..');
-        return;
-    }
-    */
-
-
     return new Promise((resolve, reject) => {
 
         if (!isValid(url)) {
@@ -43,8 +28,6 @@ function resolve(url)
                     reject(data);
                 }
             } else {
-                // We reached our target server, but it returned an error
-                console.warn("Error?");
                 reject(request);
             }
         }.bind(this);
