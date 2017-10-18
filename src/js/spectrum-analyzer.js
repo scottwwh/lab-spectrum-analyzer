@@ -38,6 +38,7 @@ var SpectrumAnalyzer = function()
         // Initialize existing links
         var els = document.querySelectorAll('.song');
         for ( var i = 0; i < els.length; i++ ) {
+            // TODO: This should autoplay the song (response to user input)
             els[i].addEventListener( 'click', this.loadSongFromClick.bind( this ) );
         }
 
@@ -125,7 +126,7 @@ var SpectrumAnalyzer = function()
         if (e.type == 'canplay') {
             document.querySelector('span#play').classList.remove('hide');
         } else if (e.type == 'pause') {
-            document.querySelector('span#play').classList.remove('hide');            
+            document.querySelector('span#play').classList.remove('hide');
         } else if (e.type == 'play') {
             document.querySelector('span#play').classList.add('hide');
 
