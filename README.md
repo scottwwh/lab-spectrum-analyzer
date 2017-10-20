@@ -1,38 +1,20 @@
 # Spectrum analyzer
 
+## Introduction
+
 Simple way to visualize audio streams using WebAudio and WebGL (via Three.js) via local MP3s or Soundcloud URLs.
 
-Looking at this after many years, still very much a work in progress. [Demo.](http://syncretinal.com/lab/spectrum_analyzer/)
+I recently started looking at this again after many years, so it's still very much a work in progress. [Demo.](http://syncretinal.com/lab/spectrum_analyzer/)
 
-Uses Node 6.x LTS.
+Requires Node 8 (async/await).
 
 ## Installation
 
 ```
-# Important :)
-% npm i --global browser-sync
+% npm i gulp-cli -g
 % npm install
-
-# Combine these two..
-% npm run dev
-% npm run server
+% gulp
 ```
-
-## TODO
-
-- Streamline build process
-- Fnd/fix performance problem after repeated play/pause events
-- Move WebAudio logic into library
-- [BUG] Fallback for IE/etc/whatever?
-- [NTH] Show loader
-- [NTH] Show when song is over / timeline for completion
-- [DONE] Minify, baby!
-- [DONE] Babel to transpile down to ES5?
-- [DONE] Replace drag/drop nonsense for SC URLs with search bar
-- [DONE] THREE.js modules from NPM
-- [DONE] Rollup to modularize code
-- [DONE] Add text input for SoundCloud URLs
-
 
 ## Old notes
 
