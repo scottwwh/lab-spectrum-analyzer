@@ -1,3 +1,7 @@
+/**
+ * DEPRECATED!
+ */
+
 import resolve from 'rollup-plugin-node-resolve';
 import minify from 'rollup-plugin-minify';
 import babel from 'rollup-plugin-babel';
