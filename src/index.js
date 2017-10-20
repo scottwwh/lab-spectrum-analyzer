@@ -1,4 +1,8 @@
 
+/**
+ * 3rd Bass in 2017!
+ */
+
 import SpectrumAnalyzer from './js/spectrum-analyzer';
 
 var app = new SpectrumAnalyzer();
