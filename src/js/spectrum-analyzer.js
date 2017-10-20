@@ -89,13 +89,11 @@ var SpectrumAnalyzer = function()
         window.addEventListener( 'resize', this.resize.bind(this) );
 
 
-        /* MENU */
+        /* SEARCH */
 
-        // this.hideNav();
         document.querySelector('input').addEventListener('keyup', e => {
             this.resolveSoundcloudURL(e.currentTarget.value);
         });
-
 
 
         /* AUDIO */
@@ -263,7 +261,7 @@ var SpectrumAnalyzer = function()
     {
         e.preventDefault();
 
-        // TODO: Add cancelRequest... method
+        // TODO: Centralize this on Audio element?
         cancelAnimationFrame(this.audioAnimation);
         this.audioAnimation = null;
 
@@ -305,7 +303,6 @@ var SpectrumAnalyzer = function()
                 this.onResolveSoundcloudURLSuccess(data);
             }).catch((err) => {
                 // console.warn('failureMessage:', err);
-                // console.warn("Sorry, that link can't be streamed");
                 document.querySelector('input').classList.remove('valid');
                 document.querySelector('input').classList.add('invalid');
             });
@@ -335,9 +332,6 @@ var SpectrumAnalyzer = function()
 
         // Update router
         this.setURL(this.currentSource);
-
-        // Update song list (if possible!)
-        // ....
 
         // Update search bar
         document.querySelector('input').classList.remove('invalid');
