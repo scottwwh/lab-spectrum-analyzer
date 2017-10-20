@@ -18,7 +18,7 @@ var SpectrumAnalyzer = function()
 
     // Audio + rendering
     this.fftSize = 512; // Duplicated in Audio at the moment
-    this.audioAnimation;
+    this.audioAnimation = null;
 
     // Set to 'new <renderer>()' from /renderers
     this.renderer = null;
@@ -127,6 +127,12 @@ var SpectrumAnalyzer = function()
             document.querySelector('span#play').classList.remove('hide');
         } else if (e.type == 'pause') {
             document.querySelector('span#play').classList.remove('hide');
+
+            // Fix performance issues with play/pause on audio element
+            if (this.audioAnimation) {
+                cancelAnimationFrame(this.audioAnimation);
+                this.audioAnimation = null;
+            }
         } else if (e.type == 'play') {
             document.querySelector('span#play').classList.add('hide');
 
@@ -257,6 +263,9 @@ var SpectrumAnalyzer = function()
     {
         e.preventDefault();
 
+        // TODO: Add cancelRequest... method
+        cancelAnimationFrame(this.audioAnimation);
+        this.audioAnimation = null;
 
         // Unstyle links
         document.querySelectorAll('.song').forEach(el => {

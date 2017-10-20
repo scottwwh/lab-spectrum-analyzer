@@ -62,5 +62,5 @@ gulp.task('default', ['rollup'], function() {
         }
     });
 
-    gulp.watch('src/*.js', ['js-watch']);
+    gulp.watch('src/**/*.js', ['js-watch']);
 });
