@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=utf-8 />
+    <title>Colours</title>
+</head>
+<body>
+
+    <!-- script type="module" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.module.js"></script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js"></script>
+    <script type="text/javascript">
+
+console.log('hello!');
+
+
+//     this.init = function()
+//     {
+        // document.addEventListener( 'mousemove', this.onMouseMove );
+
+function init() {
+        
+        const app = { fftSize: 512, WIDTH: 800, HEIGHT: 600 };
+        const canvas = document.createElement('canvas');
+        document.body.appendChild(canvas);
+
+
+        const scene = new THREE.Scene();
+
+        const light = new THREE.PointLight(0xffffff, 1, 2500, 2);
+        // light.intensity = 100;
+        light.position.y = 500;
+
+        const camera = new THREE.PerspectiveCamera( 75, app.WIDTH / app.HEIGHT, 1, 10000 );
+
+
+        const birdsEye = false;
+
+
+        if (birdsEye) { // Bird's eye grid
+            camera.position.y = 1500;
+            camera.position.z = 10; // 1500;
+        } else {
+            camera.position.y = 500;
+            camera.position.z = 1000; // 1500;
+        }
+
+        
+        // frequencyBinCount may not be available when renderer is initialized, and is always half of fftSize
+        const cubes = [];
+        const group = new THREE.Group();
+        const max = app.fftSize * 0.5;
+        let row, col,
+            len = Math.floor(Math.sqrt(max)),
+            d = 100; // Distance
+
+            
+        // console.log(max, len);
+        for (var i = 0; i < max; i++)
+        {
+            let hex = (i / max * 256).toString(16);
+            if (hex.length == 1)
+                hex = '0' + hex;
+
+            col = i % len;
+            row = Math.floor(i / len);
+
+            const transparent = true;
+            // const color = 65535; // (i / max * 0xffffff);
+            let color = 256 * 256 * (i / max * 256); // (i / max * 0xffffff);
+            // console.log(color);
+            function toBin(dec) {
+                return (dec >>> 0).toString(2);
+            }
+            function toDec(hex) {
+                return parseInt(color, 16);
+            }
+            let r = toBin(i),
+                g = toBin(i),
+                b = toBin(0)
+                ;
+            console.log(r,g,b);
+            color = '0x' + '99ffff'; // + hex;
+            color = toDec(color);
+            
+            // var geometry = new THREE.BoxGeometry( 75, 75, 75 );
+            var geometry = new THREE.SphereGeometry(90 * 0.5, 12, 12);
+            // var material = new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff, transparent: transparent, shading: THREE.FlatShading } );
+            // var material = new THREE.MeshLambertMaterial( { color: 0xffffff, transparent: transparent, flatShading: true } );
+            var material = new THREE.MeshLambertMaterial( { color: color, transparent: transparent, flatShading: true } );
+            material.opacity = 0.5;
+
+            var mesh = new THREE.Mesh(geometry, material);
+            mesh.position.x = row * d;
+            mesh.position.y = 0;
+            mesh.position.z = col * d;
+
+            group.add( mesh );
+
+            cubes.push( mesh );
+        }
+        scene.add(group);
+        scene.add(light);
+
+        camera.lookAt( scene.position );
+
+
+        var box = new THREE.Box3().setFromObject(group);
+        // console.log(box.getSize(), box.min, box.max, group.position);
+
+        if (birdsEye) {
+            group.position.x += box.getSize().x * -0.5;
+            group.position.z += box.getSize().z * 0.5;
+            group.rotation.y = Math.PI * 0.5;
+        } else {
+            group.position.x += box.getSize().x * 0.5;
+            group.position.z += box.getSize().z * -0.5;
+            group.rotation.y = Math.PI * -0.5;
+        }
+
+
+
+
+/*
+        let cubeGeometry = new THREE.BoxGeometry( 75, 75, 75 );
+            // var material = new THREE.MeshLambertMaterial( { color: (i / max) * 0x0000ff, transparent: transparent, shading: THREE.FlatShading } );
+            // var material = new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff, transparent: transparent, shading: THREE.FlatShading } );
+        let cubeMaterial = new THREE.MeshLambertMaterial( { color: 0xffffff, flatShading: true } );
+            // material.opacity = 0;
+
+            let cubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
+            mesh.position.x = 0;
+            mesh.position.y = 0;
+            mesh.position.z = 0;
+
+            // group.add( mesh );
+            // cubes.push( mesh );
+        // }
+        scene.add(cubeMesh);
+*/        
+
+
+        const renderer = new THREE.WebGLRenderer( { canvas: canvas } );
+        renderer.setSize(app.WIDTH, app.HEIGHT);
+
+        // controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
+        // controls.addEventListener( 'change', this.render ); // remove when using animation loop
+        // enable animation loop when using damping or autorotation
+        // controls.enableDamping = true;
+        // controls.dampingFactor = 0.25;
+        // controls.enableZoom = false;
+//     };
+
+
+        renderer.render(scene, camera);
+}
+
+// init();
+window.addEventListener('DOMContentLoaded', init);
+
+    </script>
+
+</body>
+</html>

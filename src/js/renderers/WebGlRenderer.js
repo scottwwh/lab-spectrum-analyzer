@@ -8,6 +8,8 @@
 import * as THREE from 'three';
 
 
+const colors = [0x00FFFF, 0x1CFFE3, 0x39FFC6, 0x55FFAA, 0x71FF8E, 0x8EFF71, 0xAAFF55, 0xC6FF39, 0xE3FF1C, 0xFFFF00]
+
 
 var SpectrumAnalyzer3dRenderer = function(app)
 {
@@ -64,12 +66,17 @@ var SpectrumAnalyzer3dRenderer = function(app)
         // console.log(max, len);
         for (var i = 0; i < max; i++)
         {
+            let hex = i.toString(16);
+            if (hex.length == 1)
+                hex = '0' + hex;
+
             col = i % len;
             row = Math.floor(i / len);
 
-            var geometry = new THREE.BoxGeometry( 75, 75, 75 );
-            var material = new THREE.MeshLambertMaterial( { color: 0xff0000, transparent: true, shading: THREE.FlatShading } );
-            material.opacity = 0;
+            const transparent = true;
+            var geometry = new THREE.SphereGeometry(100 * 0.5, 4, 12);
+            var material = new THREE.MeshLambertMaterial( { color: colors[0], transparent: transparent, flatShading: true } );
+            // material.opacity = 0;
 
             var mesh = new THREE.Mesh(geometry, material);
             mesh.position.x = row * d;
@@ -113,18 +120,19 @@ var SpectrumAnalyzer3dRenderer = function(app)
 
     this.render = function(values)
     {
-        var timer = 0.0001 * Date.now();
+        this.cubes.forEach((cube, i) => {
+            // TODO: Figure out what is causing error when setting values[i] to a const:
+            //
+            //  THREE.Matrix3.getInverse(): can't invert matrix, determinant is 0
+            //
+            let value = values[i] * Math.PI;
+            cube.scale.y = value * 2 + 0.5;
+            cube.rotation.y = value;
+            cube.material.opacity = values[i] * 0.75;
 
-        var value;
-        for ( var i = 0; i < this.cubes.length; i++ )
-        {
-            value = values[i] * Math.PI;
-            this.cubes[i].scale.y = value * 2 + 0.5;
-            this.cubes[i].rotation.y = value;
-            this.cubes[i].material.opacity = values[i] * 0.75;
-        }
-
-
+            const color = colors[Math.floor(values[i] * 10)];
+            cube.material.color.set(color);
+        });
 
         // Works, suckily
         // this.camera.position.x = mouseX + 1000;
@@ -134,11 +142,13 @@ var SpectrumAnalyzer3dRenderer = function(app)
         // camera.position.z = particles.geometry.vertices[ pos ].position.z + 300;
 
 
+        // Running into big performance issues when camera rotates around the back of low-end samples
+        // const timer = 0.0001 * Date.now();
         // this.camera.position.x = Math.cos( timer ) * 1500;
         // this.camera.position.z = Math.sin( timer ) * 1500;
-        this.camera.lookAt( this.scene.position );
+        this.camera.lookAt(this.scene.position);
 
-        this.renderer.render( this.scene, this.camera );
+        this.renderer.render(this.scene, this.camera);
     };
 
     this.resize = function() {

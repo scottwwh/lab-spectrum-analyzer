@@ -64,3 +64,19 @@ gulp.task('default', ['rollup'], function() {
 
     gulp.watch('src/**/*.js', ['js-watch']);
 });
+
+// Static server
+gulp.task('sandbox', function() {
+    browserSync.init({
+        server: {
+            baseDir: "./sandbox"
+        }
+    });
+
+    gulp.watch('sandbox/*', ['watch-sandbox']);
+});
+
+gulp.task('watch-sandbox', function (done) {
+    browserSync.reload();
+    done();
+});
