@@ -29,7 +29,7 @@ gulp.task('rollup', async function () {
           
           babelrc: false,
           presets: ['es2015-loose-rollup'],
-        }),    
+        }),
 
         minify({
           iife: {

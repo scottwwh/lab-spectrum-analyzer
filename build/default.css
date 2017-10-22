@@ -63,7 +63,7 @@ li {
 
 /* RENDERER */
 
-canvas { position: absolute; z-index: -1; top: 0; left: 0; }
+canvas { position: absolute; z-index: 0; top: 0; left: 0; }
 canvas#colourTable { right: 0; display: none; }
 
 
@@ -72,7 +72,8 @@ canvas#colourTable { right: 0; display: none; }
 nav {
     transition: opacity 0.5s;
     padding: 1rem;
-    /* background: gray; */
+    z-index: 1;
+    position: absolute;
 }
     nav.hide { opacity: 0; }
 
@@ -81,6 +82,8 @@ nav {
 
 .flex {
     display: flex;
+    left: 0;
+    right: 0;
 }
 
     .flex .col:first-child {

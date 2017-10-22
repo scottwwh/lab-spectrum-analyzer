@@ -16,6 +16,13 @@ Requires Node 8 (async/await).
 % gulp
 ```
 
+### Maintenance
+
+Convert Three.js examples' code to ES6 modules [using this gist](https://gist.github.com/amelierosser/bb3bf98d934ca2d26774788a3f9eb803):
+```
+% npm run update-three
+```
+
 ## Old notes
 
 Reference:
