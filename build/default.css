@@ -77,6 +77,12 @@ nav {
 }
     nav.hide { opacity: 0; }
 
+nav#social {
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
 
 /** NAV **/
 
@@ -119,6 +125,7 @@ body.over::before {
     top: 50%;
     left: 50%;
     padding: 0 auto;
+    transform: translate(-50%, -50%);
 }
 
 #overlay span {
@@ -126,7 +133,6 @@ body.over::before {
 }
 
 span#play {
-    transform: translate(-50%, -50%);
     font-size: 5rem;
     color: gold;
 }

@@ -6,9 +6,9 @@ Simple way to visualize audio streams using WebAudio and WebGL (via Three.js) vi
 
 I recently started looking at this again after many years, so it's still very much a work in progress. [Demo.](http://syncretinal.com/lab/spectrum_analyzer/)
 
-Requires Node 8 (async/await).
-
 ## Installation
+
+Requires Node 8 (async/await).
 
 ```
 % npm i gulp-cli -g
@@ -18,7 +18,7 @@ Requires Node 8 (async/await).
 
 ### Maintenance
 
-Convert Three.js examples' code to ES6 modules [using this gist](https://gist.github.com/amelierosser/bb3bf98d934ca2d26774788a3f9eb803):
+Convert Three.js examples' code to ES6 modules [courtesy of this gist](https://gist.github.com/amelierosser/bb3bf98d934ca2d26774788a3f9eb803):
 ```
 % npm run update-three
 ```
