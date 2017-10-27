@@ -2,3 +2,4 @@
 music
 node_modules
 build/bundle*.*
+debug.log
