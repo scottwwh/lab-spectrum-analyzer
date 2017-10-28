@@ -1,8 +1,10 @@
+/* global AudioContext, webkitAudioContext */
+
 /** WEB AUDIO **/
 
 let audioElement;
 let _audioContext;
-let _audioAnimation;
+// let _audioAnimation;
 let sourceNode;
 let analyser;
 let isWebAudioSupported = false;
@@ -11,12 +13,11 @@ let frequencyBinCount;
 const fftSize = 512;
 
 
-function initAudio(el)
-{
-    if (typeof AudioContext !== "undefined" || typeof webkitAudioContext !== "undefined") {
-        _audioContext = ( AudioContext ) ? new AudioContext() : new webkitAudioContext() ;
+function initAudio(el) {
+    if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
+        _audioContext = (AudioContext) ? new AudioContext() : new webkitAudioContext() ;
         isWebAudioSupported = true;
-        console.log('isWebAudioSupported:', isWebAudioSupported);
+        // console.log('isWebAudioSupported:', isWebAudioSupported);
     }
 
     audioElement = el;
@@ -26,7 +27,7 @@ function initAudio(el)
     // Older versions of FF?
     var canPlay = !!(audioElement.canPlayType && audioElement.canPlayType('audio/mpeg;').replace(/no/, ''));
     if (!canPlay) {
-        console.error( "Doesn't support playback" );
+        console.error('Does not support playback');
         return;
     }
 
@@ -34,19 +35,19 @@ function initAudio(el)
         setupAudioNodes();
     }
 
-    audioElement.addEventListener("canplay", audioElementHandler.bind(this), false );
-    audioElement.addEventListener("playing", audioElementHandler.bind(this), false );
-    audioElement.addEventListener("timeupdate", audioElementHandler.bind(this), false );
-    audioElement.addEventListener("pause", audioElementHandler.bind(this), false );
-    audioElement.addEventListener("play", audioElementHandler.bind(this), false );
+    audioElement.addEventListener('canplay', audioElementHandler.bind(this), false);
+    audioElement.addEventListener('playing', audioElementHandler.bind(this), false);
+    audioElement.addEventListener('timeupdate', audioElementHandler.bind(this), false);
+    audioElement.addEventListener('pause', audioElementHandler.bind(this), false);
+    audioElement.addEventListener('play', audioElementHandler.bind(this), false);
 
     // Debug
-    audioElement.addEventListener("seeked", audioElementHandler.bind(this), false ); // Occasionally not firing in Chrome
+    audioElement.addEventListener('seeked', audioElementHandler.bind(this), false); // Occasionally not firing in Chrome
     // audioElement.addEventListener("seeking", audioElementHandler.bind(this), false );
     // audioElement.addEventListener("emptied", audioElementHandler.bind(this), false );
     // audioElement.addEventListener("abort", audioElementHandler.bind(this), false );
     // audioElement.addEventListener("ended", audioElementHandler.bind(this), false );
-};
+}
 
 
 
@@ -58,24 +59,16 @@ function audioElementHandler(e)
 {
     // console.log(e.type);
 
-    if (e.type == 'canplay')
-    {
-        console.log('Show a big ass Play button!');
-    }
-    else if (e.type == 'playing')
-    {
-    }
-    else if (e.type == 'timeupdate')
-    {
+    if (e.type == 'canplay') {
+        // console.log('Show a big ass Play button!');
+    } else if (e.type == 'playing') {
         // TBD?
-    }
-    else if (e.type == 'pause')
-    {
+    } else if (e.type == 'timeupdate') {
+        // TBD?
+    } else if (e.type == 'pause') {
         // This works but animation jumps when resumed
         // cancelAnimationFrame( _audioAnimation );
-    }
-    else if (e.type == 'play')
-    {
+    } else if (e.type == 'play') {
         // Hide big ass Play button
 
         // Rely on user input to start
@@ -83,7 +76,7 @@ function audioElementHandler(e)
             // this.update();
         }
     }
-};
+}
 
 function setupAudioNodes()
 {
@@ -102,7 +95,7 @@ function setupAudioNodes()
     sourceNode = (sourceNode || _audioContext.createMediaElementSource(audioElement));
     sourceNode.connect(analyser);
     sourceNode.connect(_audioContext.destination);
-};
+}
 
 function getFrequencyBinCount() {
     analyser.getByteFrequencyData(frequencyBinCount);
@@ -135,6 +128,6 @@ export default {
     init: initAudio,
     play: play,
     loadSong: load,
-    isWebAudioSupported: () => { return isWebAudioSupported },
+    isWebAudioSupported: () => { return isWebAudioSupported; },
     getFrequencyValues: getFrequencyBinCount
 };

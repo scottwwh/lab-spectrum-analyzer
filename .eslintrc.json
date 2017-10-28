@@ -1,3 +1,40 @@
 {
-    "extends": "airbnb-base"
+    "env": {
+        "es6": true,
+        "node": true,
+        "mocha": true,
+        "browser": true
+    },
+    "extends": "eslint:recommended",
+    "rules": {
+        "indent": [
+            "warn",
+            4,
+            { "SwitchCase": 1 }
+        ],
+        "linebreak-style": [
+            "error",
+            "unix"
+        ],
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "semi": [
+            "error",
+            "always"
+        ],
+        "no-console": [
+            "warn",
+            { "allow": ["warn", "error", "info"] }
+        ],
+        "max-len": [
+            "warn",
+            120,
+            { "ignoreComments": true, "ignorePattern": "\\s*console" }
+        ]
+    },
+    "parserOptions": {
+        "sourceType": "module"
+    }
 }

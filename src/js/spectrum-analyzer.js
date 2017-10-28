@@ -43,18 +43,18 @@ var SpectrumAnalyzer = function()
         }
 
         const audioElement = document.querySelector('audio');
-        audioElement.addEventListener('canplay', audioElementHandler.bind(this));
-        audioElement.addEventListener('play', audioElementHandler.bind(this));
-        audioElement.addEventListener('pause', audioElementHandler.bind(this));
+        audioElement.addEventListener('canplay', this.audioElementHandler.bind(this));
+        audioElement.addEventListener('play', this.audioElementHandler.bind(this));
+        audioElement.addEventListener('pause', this.audioElementHandler.bind(this));
         audio.init(audioElement);
 
 
-        document.querySelector('#play').addEventListener('click', e => {
+        document.querySelector('#play').addEventListener('click', () => {
             audio.play();
         });
 
         if (!audio.isWebAudioSupported()) {
-            document.querySelector('p.compatibility').innerHTML = "(Your browser does not support WebAudio)";
+            document.querySelector('p.compatibility').innerHTML = '(Your browser does not support WebAudio)';
         }
 
 
@@ -65,9 +65,9 @@ var SpectrumAnalyzer = function()
 
         // Check renderer
         if (this.renderer) {
-            console.log('Found renderer', this.renderer);
+            // console.log('Found renderer', this.renderer);
         } else {
-            console.warn('No renderer set, fall back to default');
+            // console.warn('No renderer set, fall back to default');
             this.renderer = new DefaultRenderer(this);
         }
 
@@ -111,14 +111,12 @@ var SpectrumAnalyzer = function()
         } else if (playDefault) {
 
             // Show a big loading graphic
-            var url = document.querySelector('.song').getAttribute('href');
+            url = document.querySelector('.song').getAttribute('href');
             this.resolveSoundcloudURL(url);
         }
     };
 
-
-
-    function audioElementHandler(e)
+    this.audioElementHandler = function(e)
     {
         // console.log(e.type);
         if (e.type == 'canplay') {
@@ -181,25 +179,18 @@ var SpectrumAnalyzer = function()
 
         // This is good
         var data = e.dataTransfer || e.originalEvent.dataTransfer;
-        if ( data.files.length > 0
-                && data.files[0].name.indexOf( '.mp3' ) > -1
-                )
+        if (data.files.length > 0 && data.files[0].name.indexOf( '.mp3' ) > -1)
         {
             // Ref: http://stackoverflow.com/questions/10413548/javascript-filereader-using-a-lot-of-memory
             var url = window.URL || window.webkitURL;
             var src = url.createObjectURL( data.files[0] );
             this.updateStatus( data.files[0].name );
             audio.loadSong( src );
-        }
-        // This is stupid!
-        else if ( data.getData("URL").indexOf('soundcloud.com') > -1 )
-        {
+        } else if (data.getData('URL').indexOf('soundcloud.com') > -1) {
             console.warn('Undocumented behaviour for debugging!');
             // this.resolveSoundcloudURL( data.getData("URL") );
-        }
-        else
-        {
-            this.updateStatus( "Sorry, that didn't work - try something else." )
+        } else {
+            this.updateStatus('Sorry, that did not work - try something else.');
         }
 
         e.currentTarget.classList.remove( 'over' );
@@ -208,18 +199,15 @@ var SpectrumAnalyzer = function()
     };
 
 
-    this.mouseHandler = function(e)
-    {
+    this.mouseHandler = () => {
         this.showNav();
     };
 
-    this.resize = function(e)
-    {
+    this.resize = () => {
         this.WIDTH = window.innerWidth;
         this.HEIGHT = window.innerHeight;
 
         if (this.renderer) {
-            // console.log('Resize to ' + this.WIDTH, this.HEIGHT);
             this.renderer.resize();
         } else {
             console.warn('No renderer set');
@@ -241,7 +229,7 @@ var SpectrumAnalyzer = function()
             clearTimeout( this.timeout );
 
         // console.log('Hey!');
-        this.timeout = setTimeout( function(e) {
+        this.timeout = setTimeout(() => {
             var els = document.querySelectorAll('nav');
             for ( var i = 0; i < els.length; i++ )
                 els[i].classList.add('hide');
@@ -302,7 +290,7 @@ var SpectrumAnalyzer = function()
                 // console.log('successMessage:', data);
                 this.onResolveSoundcloudURLSuccess(data);
             }).catch((err) => {
-                // console.warn('failureMessage:', err);
+                console.warn('failureMessage:', err);
                 document.querySelector('input').classList.remove('valid');
                 document.querySelector('input').classList.add('invalid');
             });
@@ -336,14 +324,13 @@ var SpectrumAnalyzer = function()
         // Update search bar
         document.querySelector('input').classList.remove('invalid');
         document.querySelector('input').classList.add('valid');
-    }
+    };
 
 
 
     /* ROUTER */
 
-    this.hashChange = function(e)
-    {
+    this.hashChange = function(e) {
         if ( e.newURL != this.getURL() )
             this.resolveSoundcloudURL( this.getURL(e.newURL) );
     };
@@ -359,23 +346,22 @@ var SpectrumAnalyzer = function()
         return null;
     };
 
-    this.setURL = function( url )
-    {
+    this.setURL = function( url ) {
         if ( this.getURL() == url )
             return;
 
-        this.trackEvent( 'Load SoundCloud URL', url, null, false );
+        this.trackEvent('Load SoundCloud URL', url, null, false);
 
-        url = url.replace( this.baseURL,'' );
+        url = url.replace(this.baseURL, '');
         window.location.hash = 'url=' + url;
     };
 
-
-
-    /** CONVENIENCE **/
-
-    this.trackEvent = function( action, label, value, noninteraction ) {};
+    /**
+     * This will be overridden by implementation, e.g.:
+     * 
+     *      this.trackEvent = function(action, label, value, nonInteraction) {};
+     **/
+    this.trackEvent = function() {};
 };
-
 
 export default SpectrumAnalyzer;

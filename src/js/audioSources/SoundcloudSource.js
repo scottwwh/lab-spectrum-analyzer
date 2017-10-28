@@ -39,7 +39,7 @@ function resolve(url)
 
         request.send();
     });
-};
+}
 
 function getAudioStream(url) {
     var songUrl = url + '?client_id=' + scClientId;
@@ -50,9 +50,9 @@ function test(val) {
     const pass = val || Math.random();
     return new Promise((resolve, reject) => {
         if (pass > 0.5) {
-            resolve("hello");
+            resolve('hello');
         } else {
-            reject("failure reason");
+            reject('failure reason');
         }
     });
 }
