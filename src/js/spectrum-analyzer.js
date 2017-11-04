@@ -30,6 +30,9 @@ var SpectrumAnalyzer = function()
     this.baseURL = 'https://soundcloud.com/';
 
 
+    this.tempAudioElement;
+
+
     /**
      * Initialize - and grab an SC URL?
      */
@@ -43,9 +46,12 @@ var SpectrumAnalyzer = function()
         }
 
         const audioElement = document.querySelector('audio');
+        this.tempAudioElement = audioElement;
+
         audioElement.addEventListener('canplay', this.audioElementHandler.bind(this));
         audioElement.addEventListener('play', this.audioElementHandler.bind(this));
         audioElement.addEventListener('pause', this.audioElementHandler.bind(this));
+        audioElement.addEventListener('timeupdate', this.audioElementHandler.bind(this));
         audio.init(audioElement);
 
 
@@ -116,32 +122,55 @@ var SpectrumAnalyzer = function()
         }
     };
 
-    this.audioElementHandler = function(e)
-    {
+    // Move all of this into Audio element
+    this.audioElementHandler = function(e) {
         // console.log(e.type);
         if (e.type == 'canplay') {
+            // this.audioDataHasChanged = true;
             document.querySelector('span#play').classList.remove('hide');
+
+            // Should only be called once per song
+            if (!this.audioAnimation) {
+                this.update();
+            }
+        } else if (e.type == 'timeupdate') {
+            if (this.tempAudioElement.paused) {
+                // Update audio data once.. not sure if this requires temporarily playing the stream or not?
+            } else {
+                this.audioDataHasChanged = true;
+            }
         } else if (e.type == 'pause') {
             document.querySelector('span#play').classList.remove('hide');
 
             // Fix performance issues with play/pause on audio element
             if (this.audioAnimation) {
-                cancelAnimationFrame(this.audioAnimation);
-                this.audioAnimation = null;
+                this.audioDataHasChanged = false;
+                // cancelAnimationFrame(this.audioAnimation);
+                // this.audioAnimation = null;
             }
         } else if (e.type == 'play') {
+            // this.audioDataHasChanged = true;
             document.querySelector('span#play').classList.add('hide');
 
             // Rely on user input to start
-            if (audio.isWebAudioSupported()) {
-                this.update();
-            }
+            // This should perhaps only be triggered on canplay ?
+            // if (audio.isWebAudioSupported()) {
+            //     this.update();
+            // }
         }
     };
 
+    this.audioDataHasChanged = false;
+
     // Drive render loop while audio is playing
     this.update = function() {
-        this.renderer.render(audio.getFrequencyValues());
+        if (this.audioDataHasChanged) {
+            // console.log('Update audio data');
+            this.renderer.updateAudioData(audio.getFrequencyValues());
+        }
+        this.renderer.render();
+
+        // TODO: Should this be cleared when a new song loads?
         this.audioAnimation = requestAnimationFrame(this.update.bind(this));
     };
 

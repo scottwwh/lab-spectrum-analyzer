@@ -112,8 +112,7 @@ var SpectrumAnalyzer3dRenderer = function(app)
         controls.dampingFactor = 0.25;
     };
 
-    this.render = function(values)
-    {
+    this.updateAudioData = function(values) {
         this.cubes.forEach((cube, i) => {
             // TODO: Figure out what is causing error when setting values[i] to a const:
             //
@@ -127,6 +126,11 @@ var SpectrumAnalyzer3dRenderer = function(app)
             const color = colors[Math.floor(values[i] * 10)];
             cube.material.color.set(color);
         });
+    };
+
+    this.render = function()
+    {
+        // console.log('Rendering..');
 
         // Autodamping..
         controls.update();

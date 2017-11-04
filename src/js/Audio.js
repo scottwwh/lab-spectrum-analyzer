@@ -78,8 +78,7 @@ function audioElementHandler(e)
     }
 }
 
-function setupAudioNodes()
-{
+function setupAudioNodes() {
     analyser = (analyser || _audioContext.createAnalyser());
     analyser.smoothingTimeConstant = 0.25; // 0.7;
     analyser.fftSize = fftSize;
@@ -129,5 +128,6 @@ export default {
     play: play,
     loadSong: load,
     isWebAudioSupported: () => { return isWebAudioSupported; },
-    getFrequencyValues: getFrequencyBinCount
+    getFrequencyValues: getFrequencyBinCount,
+    element: audioElement
 };

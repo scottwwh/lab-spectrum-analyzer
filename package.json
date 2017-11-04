@@ -10,11 +10,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://scottwwh@bitbucket.org/scottwwh/lab-spectrum-analyzer.git"
+    "url": "https://github.com/scottwwh/lab-spectrum-analyzer.git"
   },
   "author": "Scott Harley",
   "license": "ISC",
-  "homepage": "https://bitbucket.org/scottwwh/lab-spectrum-analyzer#readme",
+  "homepage": "https://github.com/scottwwh/lab-spectrum-analyzer#readme",
   "dependencies": {
     "three": "^0.87.1"
   },
