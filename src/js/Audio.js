@@ -7,10 +7,16 @@ let _audioContext;
 // let _audioAnimation;
 let sourceNode;
 let analyser;
+
 let isWebAudioSupported = false;
+let hasUpdatedData = false;
+
 let frequencyBinCount;
 
 const fftSize = 512;
+
+// TODO: Clean up supplying intro values for renderer
+let waiting = true;
 
 
 function initAudio(el) {
@@ -35,48 +41,40 @@ function initAudio(el) {
         setupAudioNodes();
     }
 
-    audioElement.addEventListener('canplay', audioElementHandler.bind(this), false);
-    audioElement.addEventListener('playing', audioElementHandler.bind(this), false);
-    audioElement.addEventListener('timeupdate', audioElementHandler.bind(this), false);
-    audioElement.addEventListener('pause', audioElementHandler.bind(this), false);
-    audioElement.addEventListener('play', audioElementHandler.bind(this), false);
-
-    // Debug
-    audioElement.addEventListener('seeked', audioElementHandler.bind(this), false); // Occasionally not firing in Chrome
-    // audioElement.addEventListener("seeking", audioElementHandler.bind(this), false );
-    // audioElement.addEventListener("emptied", audioElementHandler.bind(this), false );
-    // audioElement.addEventListener("abort", audioElementHandler.bind(this), false );
-    // audioElement.addEventListener("ended", audioElementHandler.bind(this), false );
+    let events = String('canplay,playing,timeupdate,pause,play').split(',');
+    // events = events.concat(String('seeked,seeking,emptied,abort,ended').split(','));
+    events.forEach(e => {
+        audioElement.addEventListener(e, audioElementHandler.bind(this), false);
+    });
 }
-
-
-
 
 
 /** Event handlers **/
 
-function audioElementHandler(e)
-{
+function audioElementHandler(e) {
     // console.log(e.type);
 
     if (e.type == 'canplay') {
-        // console.log('Show a big ass Play button!');
-    } else if (e.type == 'playing') {
-        // TBD?
-    } else if (e.type == 'timeupdate') {
-        // TBD?
-    } else if (e.type == 'pause') {
-        // This works but animation jumps when resumed
-        // cancelAnimationFrame( _audioAnimation );
-    } else if (e.type == 'play') {
-        // Hide big ass Play button
-
-        // Rely on user input to start
-        if ( isWebAudioSupported ) {
-            // this.update();
+        if (waiting) {
+            hasUpdatedData = true;
         }
+    } else if (e.type == 'playing') {
+        // TBD
+    } else if (e.type == 'timeupdate') {
+        if (audioElement.paused) {
+            // Update audio data once.. not sure if this requires temporarily playing the stream or not?
+        } else {
+            hasUpdatedData = true;
+            // audioData = getFrequencyBinCount();
+        }
+    } else if (e.type == 'pause') {
+        hasUpdatedData = false;
+    } else if (e.type == 'play') {
+        // TBD
     }
 }
+
+
 
 function setupAudioNodes() {
     analyser = (analyser || _audioContext.createAnalyser());
@@ -97,16 +95,32 @@ function setupAudioNodes() {
 }
 
 function getFrequencyBinCount() {
-    analyser.getByteFrequencyData(frequencyBinCount);
-
-    // Normalize values to 0-1
     let values = [];
-    for (let i = 0, max = frequencyBinCount.length; i < max; i++)
-    {
-        values[i] = frequencyBinCount[i] / 255;
+
+    if (waiting) {
+        // Empty array
+        values = initialAudioData();
+
+        // Return to defaults
+        hasUpdatedData = false;
+        waiting = false;
+    } else {
+        // Normalize values to 0-1
+        analyser.getByteFrequencyData(frequencyBinCount);
+        for (let i = 0, max = frequencyBinCount.length; i < max; i++)
+        {
+            values[i] = frequencyBinCount[i] / 255;
+        }
     }
 
     return values;
+}
+
+function initialAudioData() {
+    // This does absolutely nothing!
+    return new Array(frequencyBinCount.length).map(i => {
+        return null;
+    });
 }
 
 function play() {
@@ -128,6 +142,7 @@ export default {
     play: play,
     loadSong: load,
     isWebAudioSupported: () => { return isWebAudioSupported; },
+    hasUpdatedData: () => { return hasUpdatedData; },
     getFrequencyValues: getFrequencyBinCount,
     element: audioElement
 };

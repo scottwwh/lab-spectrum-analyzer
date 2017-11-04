@@ -74,7 +74,7 @@ var SpectrumAnalyzer3dRenderer = function(app)
             row = Math.floor(i / len);
 
             const transparent = true;
-            var geometry = new THREE.SphereGeometry(100 * 0.5, 4, 12);
+            var geometry = new THREE.SphereGeometry(100 * 0.5, 6, 12);
             var material = new THREE.MeshLambertMaterial( { color: colors[0], transparent: transparent, flatShading: true } );
             // material.opacity = 0;
 
@@ -130,8 +130,6 @@ var SpectrumAnalyzer3dRenderer = function(app)
 
     this.render = function()
     {
-        // console.log('Rendering..');
-
         // Autodamping..
         controls.update();
 

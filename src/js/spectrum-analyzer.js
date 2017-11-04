@@ -46,12 +46,10 @@ var SpectrumAnalyzer = function()
         }
 
         const audioElement = document.querySelector('audio');
-        this.tempAudioElement = audioElement;
 
         audioElement.addEventListener('canplay', this.audioElementHandler.bind(this));
         audioElement.addEventListener('play', this.audioElementHandler.bind(this));
         audioElement.addEventListener('pause', this.audioElementHandler.bind(this));
-        audioElement.addEventListener('timeupdate', this.audioElementHandler.bind(this));
         audio.init(audioElement);
 
 
@@ -124,49 +122,30 @@ var SpectrumAnalyzer = function()
 
     // Move all of this into Audio element
     this.audioElementHandler = function(e) {
-        // console.log(e.type);
         if (e.type == 'canplay') {
-            // this.audioDataHasChanged = true;
-            document.querySelector('span#play').classList.remove('hide');
-
-            // Should only be called once per song
-            if (!this.audioAnimation) {
-                this.update();
-            }
-        } else if (e.type == 'timeupdate') {
-            if (this.tempAudioElement.paused) {
-                // Update audio data once.. not sure if this requires temporarily playing the stream or not?
+            if (this.audioAnimation) {
+                // Do nothing, rAF has already been triggered?
             } else {
-                this.audioDataHasChanged = true;
+                document.querySelector('span#play').classList.remove('hide');
+                this.update();
             }
         } else if (e.type == 'pause') {
             document.querySelector('span#play').classList.remove('hide');
-
-            // Fix performance issues with play/pause on audio element
-            if (this.audioAnimation) {
-                this.audioDataHasChanged = false;
-                // cancelAnimationFrame(this.audioAnimation);
-                // this.audioAnimation = null;
-            }
         } else if (e.type == 'play') {
-            // this.audioDataHasChanged = true;
             document.querySelector('span#play').classList.add('hide');
-
-            // Rely on user input to start
-            // This should perhaps only be triggered on canplay ?
-            // if (audio.isWebAudioSupported()) {
-            //     this.update();
-            // }
         }
     };
 
-    this.audioDataHasChanged = false;
-
     // Drive render loop while audio is playing
     this.update = function() {
-        if (this.audioDataHasChanged) {
+        // console.log('UPDATE!');
+
+        if (audio.hasUpdatedData()) {
             // console.log('Update audio data');
             this.renderer.updateAudioData(audio.getFrequencyValues());
+
+            // Pushing freq data into a buffer to avoid the boolean was exceptionally slow?
+            // this.renderer.updateAudioData(audio.getData());            
         }
         this.renderer.render();
 
@@ -257,7 +236,6 @@ var SpectrumAnalyzer = function()
         if ( this.timeout )
             clearTimeout( this.timeout );
 
-        // console.log('Hey!');
         this.timeout = setTimeout(() => {
             var els = document.querySelectorAll('nav');
             for ( var i = 0; i < els.length; i++ )
@@ -278,7 +256,6 @@ var SpectrumAnalyzer = function()
     {
         e.preventDefault();
 
-        // TODO: Centralize this on Audio element?
         cancelAnimationFrame(this.audioAnimation);
         this.audioAnimation = null;
 

@@ -135,10 +135,17 @@ body.over::before {
 span#play {
     font-size: 5rem;
     color: gold;
+    opacity: 1;
+    transition: all 0.25s ease-out;
 }
 
 span#play:hover {
     color: #fff;
+    cursor: pointer;
+}
+
+span#play.hide {
+    /*opacity: 0;*/
 }
 
 span.hide {
