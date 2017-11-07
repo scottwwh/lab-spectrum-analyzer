@@ -3,8 +3,7 @@
 /** WEB AUDIO **/
 
 let audioElement;
-let _audioContext;
-// let _audioAnimation;
+let audioContext;
 let sourceNode;
 let analyser;
 
@@ -21,7 +20,7 @@ let waiting = true;
 
 function initAudio(el) {
     if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
-        _audioContext = (AudioContext) ? new AudioContext() : new webkitAudioContext() ;
+        audioContext = (AudioContext) ? new AudioContext() : new webkitAudioContext() ;
         isWebAudioSupported = true;
         // console.log('isWebAudioSupported:', isWebAudioSupported);
     }
@@ -77,7 +76,7 @@ function audioElementHandler(e) {
 
 
 function setupAudioNodes() {
-    analyser = (analyser || _audioContext.createAnalyser());
+    analyser = (analyser || audioContext.createAnalyser());
     analyser.smoothingTimeConstant = 0.25; // 0.7;
     analyser.fftSize = fftSize;
 
@@ -89,9 +88,9 @@ function setupAudioNodes() {
     // Ref: https://bugzilla.mozilla.org/show_bug.cgi?id=937718
     //
     // Triggers error in Chrome when seeking position via media UI
-    sourceNode = (sourceNode || _audioContext.createMediaElementSource(audioElement));
+    sourceNode = (sourceNode || audioContext.createMediaElementSource(audioElement));
     sourceNode.connect(analyser);
-    sourceNode.connect(_audioContext.destination);
+    sourceNode.connect(audioContext.destination);
 }
 
 function getFrequencyBinCount() {
