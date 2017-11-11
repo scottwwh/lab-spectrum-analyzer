@@ -2,7 +2,7 @@ import DefaultRenderer from './renderers/DefaultRenderer';
 import WebGlRenderer from './renderers/WebGlRenderer';
 
 import Audio from './Audio';
-import SoundcloudSource from './audioSources/SoundcloudSource';
+import Resolver from './AudioResolver';
 
 
 let audio = Audio;
@@ -36,7 +36,7 @@ var SpectrumAnalyzer = function()
     /**
      * Initialize - and grab an SC URL?
      */
-    this.init = function(playDefault)
+    this.init = function(playDefault = false)
     {
         // Initialize existing links
         var els = document.querySelectorAll('.song');
@@ -104,8 +104,7 @@ var SpectrumAnalyzer = function()
 
         // Check for current URL and load
         var url = this.getURL();
-        if (url != null)
-        {
+        if (url != null) {
             this.resolveSoundcloudURL(url);
 
             // Load track now because URL will be disregarded in setURL (??)
@@ -114,9 +113,19 @@ var SpectrumAnalyzer = function()
         // Play default song
         } else if (playDefault) {
 
-            // Show a big loading graphic
-            url = document.querySelector('.song').getAttribute('href');
-            this.resolveSoundcloudURL(url);
+            if (false) {
+                // Show a big loading graphic
+                url = document.querySelector('.song').getAttribute('href');
+                // this.resolveSoundcloudURL(url);
+                this.resolveUrl(url);
+            } else {
+                // Do something
+                let localMp3 = './audio/';
+                // localMp3 += '02 - staring at the sun.mp3';
+                // localMp3 += '08. tipper - unlock the geometry.mp3';
+                localMp3 += '212-andre_3000-behold_a_lady-rns.mp3';
+                this.resolveUrl(localMp3);
+            }
         }
     };
 
@@ -177,32 +186,24 @@ var SpectrumAnalyzer = function()
     };
 
     // TODO: Improve this a lot!
-    this.dropHandler = function(e)
-    {
-        // console.log(this, e.currentTarget);
+    this.dropHandler = function(e) {
+        console.log('dropHandler');
         e.stopPropagation();
         e.preventDefault();
 
         this.updateStatus('Loading...');
 
-        // This is good
-        var data = e.dataTransfer || e.originalEvent.dataTransfer;
-        if (data.files.length > 0 && data.files[0].name.indexOf( '.mp3' ) > -1)
-        {
-            // Ref: http://stackoverflow.com/questions/10413548/javascript-filereader-using-a-lot-of-memory
-            var url = window.URL || window.webkitURL;
-            var src = url.createObjectURL( data.files[0] );
-            this.updateStatus( data.files[0].name );
-            audio.loadSong( src );
-        } else if (data.getData('URL').indexOf('soundcloud.com') > -1) {
-            console.warn('Undocumented behaviour for debugging!');
-            // this.resolveSoundcloudURL( data.getData("URL") );
-        } else {
-            this.updateStatus('Sorry, that did not work - try something else.');
-        }
+        const data = e.dataTransfer || e.originalEvent.dataTransfer;
+        Resolver.resolveData(data).then(song => {
+            this.updateStatus(song.name);
+            audio.loadSong(song.src);
+        }).catch(err => {
+            console.warn(err);
+        });
 
-        e.currentTarget.classList.remove( 'over' );
+        e.currentTarget.classList.remove('over');
 
+        // Necessary?
         return false;
     };
 
@@ -252,8 +253,7 @@ var SpectrumAnalyzer = function()
         document.querySelector('p.status').innerHTML = str;
     };
 
-    this.loadSongFromClick = function(e)
-    {
+    this.loadSongFromClick = function(e) {
         e.preventDefault();
 
         cancelAnimationFrame(this.audioAnimation);
@@ -267,70 +267,62 @@ var SpectrumAnalyzer = function()
         // Style active link
         e.currentTarget.classList.add('enabled');
 
-
-        var path = e.currentTarget.getAttribute('href');
-        if ( path.indexOf( 'soundcloud' ) > -1 )
-        {
-            this.resolveSoundcloudURL( path );
-        }
-        else
-        {
-            audio.loadSong( path );
-        }
+        this.resolveUrl(e.currentTarget.getAttribute('href'));
     };
 
-
+    this.resolveUrl = function(url) {
+        if (url.indexOf('soundcloud') > -1) {
+            this.resolveSoundcloudURL(url);
+        } else {
+            audio.loadSong(url);
+        }
+    };
 
     this.resolveSoundcloudURL = function(url)
     {
-        // This should be a separate value, e.g. currentValidSource..
+        /*
+        // This is incorrect, because setting this value does not
+        // guarantee that it has been resolved/loaded..
         if (this.currentSource != url) {
             this.currentSource = url;
         } else {
-            return;
+            return false;
         }
+        */
 
-        if (SoundcloudSource.isValidURL(url)) {
-            const resolvedURL = SoundcloudSource.resolveURL(url);
-            resolvedURL.then((data) => {
-                // console.log('successMessage:', data);
-                this.onResolveSoundcloudURLSuccess(data);
-            }).catch((err) => {
-                console.warn('failureMessage:', err);
-                document.querySelector('input').classList.remove('valid');
-                document.querySelector('input').classList.add('invalid');
-            });
-            
-        } else {
-            // console.log('Invalid URL');
-            return;
-        }
+        Resolver.resolveUrl(url).then(song => {
+
+            // Update status
+            this.updateStatus('Loading...');
+
+            // Update active song link
+            var a = document.createElement('a');
+            a.appendChild( document.createTextNode(song.name));
+            a.setAttribute('href', song.link);
+            var el = document.querySelector('p.status');
+            if (el.childNodes.length > 0)
+                el.removeChild(el.childNodes[0]);
+            el.appendChild(a);
+
+            // Update audio source
+            audio.loadSong(song.src);
+
+            // Update router - this will not work at the minute?
+            console.log(song.currentSource);
+            this.currentSource = song.currentSource;
+            this.setURL(song.currentSource);
+
+            // Update search bar
+            document.querySelector('input').classList.remove('invalid');
+            document.querySelector('input').classList.add('valid');
+
+        }).catch(err => {
+            console.warn(err);
+            document.querySelector('input').classList.remove('valid');
+            document.querySelector('input').classList.add('invalid');
+        });
     };
 
-    this.onResolveSoundcloudURLSuccess = function(result) {
-
-        // Update status
-        this.updateStatus('Loading...');
-
-        // Update active song link
-        var a = document.createElement('a');
-        a.appendChild( document.createTextNode( result.title ) );
-        a.setAttribute( 'href', result.permalink_url );
-        var el = document.querySelector('p.status');
-        if (el.childNodes.length > 0)
-            el.removeChild(el.childNodes[0]);
-        el.appendChild(a);
-
-        // Update audio source
-        audio.loadSong(SoundcloudSource.getAudioURL(result.stream_url));
-
-        // Update router
-        this.setURL(this.currentSource);
-
-        // Update search bar
-        document.querySelector('input').classList.remove('invalid');
-        document.querySelector('input').classList.add('valid');
-    };
 
 
 
