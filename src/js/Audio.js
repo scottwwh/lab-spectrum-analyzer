@@ -126,6 +126,10 @@ function play() {
     audioElement.play();
 }
 
+function pause() {
+    audioElement.pause();
+}
+
 function load(url) {
     // Prevent a memory leak/performance hit?
     //
@@ -139,7 +143,9 @@ function load(url) {
 export default {
     init: initAudio,
     play: play,
+    pause: pause,
     loadSong: load,
+    isPaused: () => { return audioElement.paused; },
     isWebAudioSupported: () => { return isWebAudioSupported; },
     hasUpdatedData: () => { return hasUpdatedData; },
     getFrequencyValues: getFrequencyBinCount,

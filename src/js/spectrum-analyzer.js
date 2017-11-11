@@ -91,6 +91,9 @@ var SpectrumAnalyzer = function()
         window.addEventListener( 'hashchange', this.hashChange.bind(this) );
         window.addEventListener( 'mousemove', this.mouseHandler.bind(this) );
         window.addEventListener( 'resize', this.resize.bind(this) );
+        window.addEventListener('keyup', this.keyHandler.bind(this));
+
+        
 
 
         /* SEARCH */
@@ -125,6 +128,24 @@ var SpectrumAnalyzer = function()
                 // localMp3 += '08. tipper - unlock the geometry.mp3';
                 localMp3 += '212-andre_3000-behold_a_lady-rns.mp3';
                 this.resolveUrl(localMp3);
+            }
+        }
+    };
+
+    this.keyHandler = function(e) {
+        // Ignore event if it originates from the search box
+        if (e.srcElement.nodeName === 'INPUT') {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+        
+        // console.log(e, e.keyCode, audio);
+        if (e.keyCode == 32) {
+            if (audio.isPaused()) {
+                audio.play();
+            } else {
+                audio.pause();
             }
         }
     };
