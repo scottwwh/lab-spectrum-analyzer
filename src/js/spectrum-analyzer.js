@@ -99,8 +99,12 @@ var SpectrumAnalyzer = function()
         /* SEARCH */
 
         document.querySelector('input').addEventListener('keyup', e => {
-            this.resolveUrl(e.currentTarget.value);
+            const url = e.currentTarget.value;
+            if (Resolver.isValidURL(url)) { 
+                this.resolveUrl(url);
+            }
         });
+
 
 
         /* AUDIO */
@@ -113,9 +117,8 @@ var SpectrumAnalyzer = function()
 
         } else if (playDefault) {
 
-            url = '02 - staring at the sun.mp3';
-            // url = '08. tipper - unlock the geometry.mp3';
-            // url = '212-andre_3000-behold_a_lady-rns.mp3';
+            const songs = ['02 - staring at the sun.mp3','08. tipper - unlock the geometry.mp3','212-andre_3000-behold_a_lady-rns.mp3'];
+            url = songs[Math.floor(Math.random() * songs.length)];
 
             // Load first song from links
             // url = document.querySelector('.song').getAttribute('href');
@@ -199,11 +202,9 @@ var SpectrumAnalyzer = function()
 
     // TODO: Improve this a lot!
     this.dropHandler = function(e) {
-        console.log('dropHandler');
+        // console.log('dropHandler');
         e.stopPropagation();
         e.preventDefault();
-
-        this.updateStatus('Loading...');
 
         const data = e.dataTransfer || e.originalEvent.dataTransfer;
         Resolver.resolveData(data).then(song => {
@@ -260,9 +261,22 @@ var SpectrumAnalyzer = function()
 
     /* UI */
 
-    this.updateStatus = function( str )
+    this.updateStatus = function(text, link = null)
     {
-        document.querySelector('p.status').innerHTML = str;
+        const elText = document.createTextNode(text);
+        let el = null;
+        if (link) {
+            el = document.createElement('a');
+            el.setAttribute('href', link);
+            el.appendChild(elText);
+        } else {
+            el = elText;
+        }
+
+        const elParent = document.querySelector('p.status');
+        if (elParent.childNodes.length > 0)
+            elParent.removeChild(elParent.childNodes[0]);
+        elParent.appendChild(el);
     };
 
     this.loadSongFromClick = function(e) {
@@ -284,62 +298,31 @@ var SpectrumAnalyzer = function()
 
     this.resolveUrl = function(url) {
 
-        /*
-        // This is incorrect, because setting this value does not
-        // guarantee that it has been resolved/loaded..
-        if (this.currentSource != url) {
-            this.currentSource = url;
-        } else {
-            return false;
-        }
-        */
-
         Resolver.resolveUrl(url).then(song => {
 
             // TODO: Show a big loading graphic
-
-            // Update status
-            this.updateStatus('Loading...');
-            // console.log(song);
-
-            // TODO: Move to dedicate method
-            //
-            // Update active song link
-            const elName = document.createTextNode(song.name);
-            let el = null,
-                elParent = document.querySelector('p.status');
-
-            if (song.link) {
-                el = document.createElement('a');
-                el.setAttribute('href', song.link);
-                el.appendChild(elName);
-            } else {
-                el = elName;
-            }
-
-            if (elParent.childNodes.length > 0)
-                elParent.removeChild(elParent.childNodes[0]);
-            elParent.appendChild(el);
-
+            this.updateStatus(song.name, song.link);
 
             // Update audio source
             audio.loadSong(song.src);
 
-            // Update router - this will not work at the minute?
-            // console.log('Current source:', song.currentSource);
-            this.currentSource = song.currentSource;
-
-            // TODO: This should not happen with local URLs
-            this.setURL(song.currentSource);
+            this.setURL(Resolver.getCurrentSource());
 
             // Update search bar
             document.querySelector('input').classList.remove('invalid');
             document.querySelector('input').classList.add('valid');
 
         }).catch(err => {
-            console.warn(err);
-            document.querySelector('input').classList.remove('valid');
-            document.querySelector('input').classList.add('invalid');
+
+            // Temporary convention to work around non-critical rejections
+            if (err instanceof Object) {
+                console.warn(err.msg);
+            } else {
+                console.error(err);
+                document.querySelector('input').classList.remove('valid');
+                document.querySelector('input').classList.add('invalid');
+            }
+
         });
     };
 
@@ -356,20 +339,22 @@ var SpectrumAnalyzer = function()
     };
 
     this.getURL = function(url) {
+        const key = 'url=';
+
         // Assumes SC URL, should be moved into AudioResolver
         if (url) {
-            return this.baseURL + url.substr( url.indexOf( 'url=' ) + 4 );
+            return this.baseURL + url.substr(url.indexOf(key) + key.length);
         }
 
         // Check for presence of URL
-        if (window.location.href.indexOf('url=') > -1) {
-            const i = window.location.hash.indexOf( 'url=' );
-            const url = window.location.hash.substr(i + 4);
+        if (window.location.hash && window.location.href.indexOf(key) > -1) {
+            const i = window.location.hash.indexOf(key);
+            const url = window.location.hash.substr(i + key.length);
             
             if (url == 'local') {
                 return url;
             } else {
-                return this.baseURL + window.location.hash.substr( window.location.hash.indexOf( 'url=' ) + 4 );
+                return this.baseURL + window.location.hash.substr(window.location.hash.indexOf(key) + key.length);
             }
         }
 
@@ -379,8 +364,6 @@ var SpectrumAnalyzer = function()
     this.setURL = function(url) {
         if (this.getURL() == url)
             return;
-
-        // this.trackEvent('Load SoundCloud URL', url, null, false);
 
         url = url.replace(this.baseURL, '');
         window.location.hash = 'url=' + url;

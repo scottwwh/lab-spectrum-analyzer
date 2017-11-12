@@ -2,6 +2,8 @@
 import SoundcloudSource from './audioSources/SoundcloudSource';
 
 
+const supportedFileType = '.mp3';
+
 let currentSource = null;
 
 
@@ -11,14 +13,11 @@ function resolveUrl(url) {
 
         // This is incorrect, because setting this value does not
         // guarantee that it has been resolved/loaded..
-        if (currentSource != url) {
-            currentSource = url;
-        } else {
-            reject(`URL ${url} is already loaded`);
+        if (currentSource == url) {
+            reject({msg: `URL ${url} is already loaded`});
         }
         
         let song = {
-            currentSource: currentSource, // TODO: Centralize!
             name: null,
             link: null,
             src: null
@@ -29,6 +28,9 @@ function resolveUrl(url) {
             const resolvedURL = SoundcloudSource.resolveURL(url);
             resolvedURL.then((result) => {
 
+                // Now that we've resolved the URL, save it!
+                currentSource = url;
+
                 song.name = result.title;
                 song.link = result.permalink_url;
                 song.src = SoundcloudSource.getAudioURL(result.stream_url);
@@ -37,10 +39,11 @@ function resolveUrl(url) {
             }).catch((err) => {
                 reject('Failed to resolve SoundCloud URL:', err);
             });
-        } else if (isLocal(url)) {
+        } else if (isValidFile(url)) {
 
-            song.currentSource = 'local';
-            song.name = url; // TODO: Trim filename
+            currentSource = url;
+
+            song.name = url.replace(supportedFileType, '');
             song.src = './audio/' + url;
             resolve(song);
 
@@ -50,31 +53,24 @@ function resolveUrl(url) {
     });
 }
 
-// TODO: Add actual condition
-function isLocal(url) {
-    if (url == url) {
-        return true;
-    }
-}
-
 function resolveData(data) {
     return new Promise((resolve, reject) => {
 
         // MP3 has been dropped
-        if (data.files.length > 0 && data.files[0].name.indexOf( '.mp3' ) > -1) {
+        if (data.files.length > 0 && isValidFile(data.files[0].name)) {
             // Ref: http://stackoverflow.com/questions/10413548/javascript-filereader-using-a-lot-of-memory
             var url = window.URL || window.webkitURL;
             var src = url.createObjectURL(data.files[0]);
             const song = {
-                name: data.files[0].name,
+                name: data.files[0].name.replace(supportedFileType, ''),
                 link: null,
                 src: src
             };
             resolve(song);
 
-        // SoundCloud URL has been dropped
+        // SoundCloud URL has been dropped - this is the most unfriendly way to do this!
         } else if (data.getData('URL').indexOf('soundcloud.com') > -1) {
-            reject('Undocumented behaviour for debugging!');
+            reject('Undocumented/unsupported behaviour for debugging!');
 
             // TODO: Move SC into this module
             // this.resolveSoundcloudURL( data.getData("URL") );
@@ -86,7 +82,23 @@ function resolveData(data) {
     });
 }
 
+function isValidFile(url) {
+    const re = new RegExp(`${supportedFileType}$`, 'i');
+    return Boolean(url.match(re));
+}
+
+function isValidURL(url) {
+    return SoundcloudSource.isValidURL(url);
+}
+
+function getCurrentSource() {
+    return currentSource;
+}
+
 export default {
     resolveUrl,
-    resolveData
+    resolveData,
+    getCurrentSource,
+    isValidFile,
+    isValidURL
 };
