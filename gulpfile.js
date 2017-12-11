@@ -5,6 +5,14 @@ const resolve     = require('rollup-plugin-node-resolve');
 const minify      = require('rollup-plugin-minify');
 const babel       = require('rollup-plugin-babel');
 
+// Work-around for delay in Ctrl-C working on Windows
+process.on('SIGINT', function() {
+  setTimeout(function() {
+    gutil.log(gutil.colors.red('Successfully closed ' + process.pid));
+    process.exit(1);
+  }, 500);
+});
+
 // Rollup - INCOMPLETE
 gulp.task('rollup', async function () {
     const bundle = await rollup.rollup({
@@ -77,6 +85,22 @@ gulp.task('sandbox', function() {
 });
 
 gulp.task('watch-sandbox', function (done) {
+    browserSync.reload();
+    done();
+});
+
+// Static server
+gulp.task('blar', function() {
+    browserSync.init({
+        server: {
+            baseDir: "./src"
+        }
+    });
+
+    gulp.watch('src/*', ['watch-blar']);
+});
+
+gulp.task('watch-blar', function (done) {
     browserSync.reload();
     done();
 });

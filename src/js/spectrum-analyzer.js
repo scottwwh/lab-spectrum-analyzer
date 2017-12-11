@@ -3,7 +3,7 @@ import WebGlRenderer from './renderers/WebGlRenderer';
 
 import Audio from './Audio';
 import Resolver from './AudioResolver';
-
+import Router from './Router';
 
 let audio = Audio;
 
@@ -110,18 +110,24 @@ var SpectrumAnalyzer = function()
         /* AUDIO */
 
         // Check for current URL and load
-        let url = this.getURL();
-        // console.log('getURL():', url);
+        let url = Router.getURL();
+        console.log('getURL():', url);
         if (url != null && url != 'local') {
+            
             this.resolveUrl(url);
 
         } else if (playDefault) {
 
-            const songs = ['02 - staring at the sun.mp3','08. tipper - unlock the geometry.mp3','212-andre_3000-behold_a_lady-rns.mp3'];
-            url = songs[Math.floor(Math.random() * songs.length)];
+            // TODO: Add debug flag for local development for this, as I don't want
+            // to be streaming MP3s..
+            //
+            // const songs = ['02 - staring at the sun.mp3','08. tipper - unlock the geometry.mp3','212-andre_3000-behold_a_lady-rns.mp3'];
+            // url = songs[Math.floor(Math.random() * songs.length)];
 
             // Load first song from links
-            // url = document.querySelector('.song').getAttribute('href');
+            const el = document.querySelector('.song');
+            el.classList.add('enabled');
+            url = el.getAttribute('href');
             this.resolveUrl(url);
         }
     };
@@ -236,8 +242,7 @@ var SpectrumAnalyzer = function()
         }
     };
 
-    this.showNav = function()
-    {
+    this.showNav = function() {
         var els = document.querySelectorAll('nav');
         for ( var i = 0; i < els.length; i++ )
             els[i].classList.remove('hide');
@@ -245,8 +250,7 @@ var SpectrumAnalyzer = function()
         this.hideNav();
     };
 
-    this.hideNav = function()
-    {
+    this.hideNav = function() {
         if ( this.timeout )
             clearTimeout( this.timeout );
 
@@ -261,8 +265,7 @@ var SpectrumAnalyzer = function()
 
     /* UI */
 
-    this.updateStatus = function(text, link = null)
-    {
+    this.updateStatus = function(text, link = null) {
         const elText = document.createTextNode(text);
         let el = null;
         if (link) {
@@ -306,7 +309,7 @@ var SpectrumAnalyzer = function()
             // Update audio source
             audio.loadSong(song.src);
 
-            this.setURL(Resolver.getCurrentSource());
+            Router.setURL(Resolver.getCurrentSource());
 
             // Update search bar
             document.querySelector('input').classList.remove('invalid');
@@ -327,49 +330,17 @@ var SpectrumAnalyzer = function()
     };
 
 
-
-
     /* ROUTER */
 
     this.hashChange = function(e) {
-        // console.log(e);
-        if (e.newURL != this.getURL() && e.newURL.indexOf('local') == -1) {
-            this.resolveUrl(this.getURL(e.newURL));
+        if (Router.isNewSource(e.newURL)) {
+            this.resolveUrl(Router.getURL(e.newURL));
         }
     };
 
-    this.getURL = function(url) {
-        const key = 'url=';
 
-        // Assumes SC URL, should be moved into AudioResolver
-        if (url) {
-            return this.baseURL + url.substr(url.indexOf(key) + key.length);
-        }
-
-        // Check for presence of URL
-        if (window.location.hash && window.location.href.indexOf(key) > -1) {
-            const i = window.location.hash.indexOf(key);
-            const url = window.location.hash.substr(i + key.length);
-            
-            if (url == 'local') {
-                return url;
-            } else {
-                return this.baseURL + window.location.hash.substr(window.location.hash.indexOf(key) + key.length);
-            }
-        }
-
-        return null;
-    };
-
-    this.setURL = function(url) {
-        if (this.getURL() == url)
-            return;
-
-        url = url.replace(this.baseURL, '');
-        window.location.hash = 'url=' + url;
-    };
-
-    /**
+    /* Tracking
+     *
      * This will be overridden by implementation, e.g.:
      * 
      *      this.trackEvent = function(action, label, value, nonInteraction) {};

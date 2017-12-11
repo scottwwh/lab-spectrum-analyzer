@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=utf-8 />
+    <title>Spectrum analyzer - Syncretinal</title>
+    <link rel="stylesheet" media="screen" href="default.css" />
+    <link rel="stylesheet" media="screen" href="fonts.css" />
+    <script type="text/javascript">
+
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-3494214-5']);
+        _gaq.push(['_setDomainName', 'syncretinal.com']);
+        _gaq.push(['_trackPageview']);
+
+        (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+
+    </script>
+</head>
+<body>
+
+
+<nav class="flex">
+
+  <div class="col">
+    <input type="text" placeholder="Enter a SoundCloud URL.."/>
+    <p class="compatibility"></p>
+  </div>
+
+  <div class="col">
+    <audio controls>
+        <source type="audio/mpeg" />
+    </audio>
+
+    <p class="status"></p>
+  </div>
+
+  <div class="col">
+    Drag/drop an MP3 or try these songs by:
+    <ul id="songs">
+        <li><a class="song" href="https://soundcloud.com/good-timin/sharing">Jex Opolis</a></li>
+        <li><a class="song" href="https://soundcloud.com/kidlogic/souls-of-mischief-93-till">KidLogic</a></li>
+        <li><a class="song" href="https://soundcloud.com/thrilljockey/matmos-teen-paranormal-romance">Matmos</a></li>
+        <li><a class="song" href="https://soundcloud.com/anyaku/anyaku-genken-warriors-dub">Anyaku</a></li>
+    </ul>
+  </div>
+
+</nav>
+
+
+<nav id="overlay">
+    <span id="play" class="icon-play2 hide"></span>
+</nav>
+
+
+<nav id="social">
+    <a href="https://github.com/scottwwh/lab-spectrum-analyzer">GitHub</a>
+</nav>
+
+
+<canvas id="songcanvas" width="1000" height="325"></canvas>
+<canvas id="colourTable" width="512" height="256"></canvas>
+
+<script type="module" src="index.js"></script>
+
+</body>
+</html>

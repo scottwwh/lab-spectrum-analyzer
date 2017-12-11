@@ -4,7 +4,7 @@
  * 3rd Bass in 2017!
  */
 
-import SpectrumAnalyzer from './js/spectrum-analyzer';
+import SpectrumAnalyzer from './js/spectrum-analyzer.js';
 
 var app = new SpectrumAnalyzer();
 app.trackEvent = function(action, label, value, nonInteraction) {
@@ -13,4 +13,3 @@ app.trackEvent = function(action, label, value, nonInteraction) {
 };
 app.init(true);
 // app.init();
-
