@@ -30,7 +30,6 @@
     "rollup-plugin-browsersync": "^0.2.4",
     "rollup-plugin-minify": "^1.0.3",
     "rollup-plugin-node-resolve": "^3.0.0",
-    "rollup-watch": "^4.0.0",
-    "shelljs": "^0.7.8"
+    "rollup-watch": "^4.0.0"
   }
 }

@@ -4,3 +4,4 @@ node_modules
 build/bundle*.*
 debug.log
 .vscode
+build

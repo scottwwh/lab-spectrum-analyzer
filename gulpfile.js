@@ -63,7 +63,17 @@ gulp.task('js-watch', ['rollup'], function (done) {
 });
 
 // Static server
-gulp.task('default', ['rollup'], function() {
+gulp.task('default', ['build'], function() {
+    // All done
+});
+
+// Static server
+gulp.task('build', ['rollup'], function() {
+    // All done
+});
+
+// Static server
+gulp.task('dev', ['build'], function() {
     browserSync.init({
         server: {
             baseDir: "./build"
