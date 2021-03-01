@@ -6,7 +6,8 @@
   "scripts": {
     "test": "./node_modules/.bin/eslint src/**/*",
     "update-three": "node utils/three-examples-converter.js",
-    "start": "gulp"
+    "start": "npx rollup -c -w",
+    "start:old": "gulp"
   },
   "repository": {
     "type": "git",
@@ -24,7 +25,6 @@
     "eslint": "^4.10.0",
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-plugin-import": "^2.8.0",
-    "gulp": "^3.9.1",
     "rollup": "^0.50.0",
     "rollup-plugin-babel": "^2.7.1",
     "rollup-plugin-browsersync": "^0.2.4",

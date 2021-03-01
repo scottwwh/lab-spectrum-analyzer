@@ -2,6 +2,7 @@
 
 /** WEB AUDIO **/
 
+let initialized = false;
 let audioElement;
 let audioContext;
 let sourceNode;
@@ -17,14 +18,7 @@ const fftSize = 512;
 // TODO: Clean up supplying intro values for renderer
 let waiting = true;
 
-
-function initAudio(el) {
-    if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
-        audioContext = (AudioContext) ? new AudioContext() : new webkitAudioContext() ;
-        isWebAudioSupported = true;
-        // console.log('isWebAudioSupported:', isWebAudioSupported);
-    }
-
+function init(el) {
     audioElement = el;
     audioElement.setAttribute( 'crossOrigin', 'anonymous' );
     audioElement.setAttribute( 'preload', 'auto' );
@@ -36,15 +30,30 @@ function initAudio(el) {
         return;
     }
 
-    if (isWebAudioSupported) {
-        setupAudioNodes();
-    }
-
     let events = String('canplay,playing,timeupdate,pause,play').split(',');
     // events = events.concat(String('seeked,seeking,emptied,abort,ended').split(','));
     events.forEach(e => {
         audioElement.addEventListener(e, audioElementHandler.bind(this), false);
     });
+}
+
+function initAudio() {
+    if (initialized) return;
+
+    console.log('Initialize audio context');
+    if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
+        audioContext = (AudioContext) ? new AudioContext() : new webkitAudioContext() ;
+        isWebAudioSupported = true;
+        // console.log('isWebAudioSupported:', isWebAudioSupported);
+    }
+
+    if (isWebAudioSupported) {
+        setupAudioNodes();
+    } else {
+        console.log('Web audio not supported');
+    }
+
+    initialized = true;
 }
 
 
@@ -116,13 +125,11 @@ function getFrequencyBinCount() {
 }
 
 function initialAudioData() {
-    // This does absolutely nothing!
-    return new Array(frequencyBinCount.length).map(i => {
-        return null;
-    });
+    return new Array(fftSize / 2).fill(0);
 }
 
 function play() {
+    initAudio();
     audioElement.play();
 }
 
@@ -141,7 +148,7 @@ function load(url) {
 }
 
 export default {
-    init: initAudio,
+    init: init,
     play: play,
     pause: pause,
     loadSong: load,

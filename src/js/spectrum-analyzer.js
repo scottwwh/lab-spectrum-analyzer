@@ -28,6 +28,7 @@ var SpectrumAnalyzer = function()
 
     // Used by router, duplicates SC source module
     this.baseURL = 'https://soundcloud.com/';
+    this.currentUrl = null;
 
 
     this.tempAudioElement;
@@ -57,9 +58,9 @@ var SpectrumAnalyzer = function()
             audio.play();
         });
 
-        if (!audio.isWebAudioSupported()) {
-            document.querySelector('p.compatibility').innerHTML = '(Your browser does not support WebAudio)';
-        }
+        // if (!audio.isWebAudioSupported()) {
+        //     document.querySelector('p.compatibility').innerHTML = '(Your browser does not support WebAudio)';
+        // }
 
 
         /* RENDERER */
@@ -111,9 +112,13 @@ var SpectrumAnalyzer = function()
 
         // Check for current URL and load
         let url = Router.getURL();
-        console.log('getURL():', url);
+        // console.log('getURL():', url);
         if (url != null && url != 'local') {
-            
+
+            const el = document.querySelector(`.song[href='${url}']`);
+            el.classList.add('enabled');
+            url = el.getAttribute('href');
+            this.currentUrl = url;
             this.resolveUrl(url);
 
         } else if (playDefault) {
@@ -128,6 +133,7 @@ var SpectrumAnalyzer = function()
             const el = document.querySelector('.song');
             el.classList.add('enabled');
             url = el.getAttribute('href');
+            this.currentUrl = url;
             this.resolveUrl(url);
         }
     };
@@ -168,14 +174,12 @@ var SpectrumAnalyzer = function()
 
     // Drive render loop while audio is playing
     this.update = function() {
-        // console.log('UPDATE!');
-
         if (audio.hasUpdatedData()) {
             // console.log('Update audio data');
             this.renderer.updateAudioData(audio.getFrequencyValues());
 
-            // Pushing freq data into a buffer to avoid the boolean was exceptionally slow?
-            // this.renderer.updateAudioData(audio.getData());            
+            // NB: Pushing freq data into a buffer to avoid the boolean was exceptionally slow?
+            // this.renderer.updateAudioData(audio.getData());
         }
         this.renderer.render();
 
@@ -285,6 +289,13 @@ var SpectrumAnalyzer = function()
     this.loadSongFromClick = function(e) {
         e.preventDefault();
 
+        const url = e.currentTarget.getAttribute('href');
+        if (url === this.currentUrl) {
+            return;
+        } else {
+            this.currentUrl = url;
+        }
+
         cancelAnimationFrame(this.audioAnimation);
         this.audioAnimation = null;
 
@@ -296,7 +307,7 @@ var SpectrumAnalyzer = function()
         // Style active link
         e.currentTarget.classList.add('enabled');
 
-        this.resolveUrl(e.currentTarget.getAttribute('href'));
+        this.resolveUrl(url);
     };
 
     this.resolveUrl = function(url) {
