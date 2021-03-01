@@ -1,26 +1,30 @@
 {
   "name": "lab-spectrum-analyzer",
-  "version": "0.2.0",
+  "version": "0.3.1",
   "description": "0.0.1",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "gulp"
+    "test": "./node_modules/.bin/eslint src/**/*",
+    "update-three": "node utils/three-examples-converter.js",
+    "start": "npx rollup -c -w",
+    "start:old": "gulp"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://scottwwh@bitbucket.org/scottwwh/lab-spectrum-analyzer.git"
+    "url": "https://github.com/scottwwh/lab-spectrum-analyzer.git"
   },
   "author": "Scott Harley",
   "license": "ISC",
-  "homepage": "https://bitbucket.org/scottwwh/lab-spectrum-analyzer#readme",
+  "homepage": "https://github.com/scottwwh/lab-spectrum-analyzer#readme",
   "dependencies": {
     "three": "^0.87.1"
   },
   "devDependencies": {
     "babel-preset-es2015-loose-rollup": "^7.0.0",
     "browser-sync": "^2.18.13",
-    "gulp": "^3.9.1",
+    "eslint": "^4.10.0",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.8.0",
     "rollup": "^0.50.0",
     "rollup-plugin-babel": "^2.7.1",
     "rollup-plugin-browsersync": "^0.2.4",

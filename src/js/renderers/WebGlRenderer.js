@@ -6,9 +6,11 @@
 // TODO: Figure out why we're still pulling in all modules?
 // import { Scene, PointLight, PerspectiveCamera, BoxGeometry, MeshLambertMaterial, Mesh, FlatShading, WebGLRenderer } from 'three/build/three.modules';
 import * as THREE from 'three';
+import OrbitControls from '../lib/three/examples/OrbitControls';
 
 
 const colors = [0x00FFFF, 0x1CFFE3, 0x39FFC6, 0x55FFAA, 0x71FF8E, 0x8EFF71, 0xAAFF55, 0xC6FF39, 0xE3FF1C, 0xFFFF00]
+let controls;
 
 
 var SpectrumAnalyzer3dRenderer = function(app)
@@ -31,9 +33,6 @@ var SpectrumAnalyzer3dRenderer = function(app)
     // Loop keeps playing even when no sound
     this.init = function()
     {
-        // document.addEventListener( 'mousemove', this.onMouseMove );
-
-        
         this.scene = new THREE.Scene();
 
         var light = new THREE.PointLight( 0xffffff, 1 );
@@ -41,6 +40,7 @@ var SpectrumAnalyzer3dRenderer = function(app)
         light.position.y = 500;
 
         this.camera = new THREE.PerspectiveCamera( 75, app.WIDTH / app.HEIGHT, 1, 10000 );
+
 
 
         var birdsEye = false;
@@ -74,7 +74,7 @@ var SpectrumAnalyzer3dRenderer = function(app)
             row = Math.floor(i / len);
 
             const transparent = true;
-            var geometry = new THREE.SphereGeometry(100 * 0.5, 4, 12);
+            var geometry = new THREE.SphereGeometry(100 * 0.5, 6, 12);
             var material = new THREE.MeshLambertMaterial( { color: colors[0], transparent: transparent, flatShading: true } );
             // material.opacity = 0;
 
@@ -107,19 +107,12 @@ var SpectrumAnalyzer3dRenderer = function(app)
 
         this.renderer = new THREE.WebGLRenderer( { canvas: canvas } );
         this.renderer.setSize(app.WIDTH, app.HEIGHT);
-
-        // controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
-        // controls.addEventListener( 'change', this.render ); // remove when using animation loop
-        // enable animation loop when using damping or autorotation
-        // controls.enableDamping = true;
-        // controls.dampingFactor = 0.25;
-        // controls.enableZoom = false;
+        controls = new OrbitControls(this.camera, canvas);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.25;
     };
 
-    // var controls;
-
-    this.render = function(values)
-    {
+    this.updateAudioData = function(values) {
         this.cubes.forEach((cube, i) => {
             // TODO: Figure out what is causing error when setting values[i] to a const:
             //
@@ -133,20 +126,12 @@ var SpectrumAnalyzer3dRenderer = function(app)
             const color = colors[Math.floor(values[i] * 10)];
             cube.material.color.set(color);
         });
+    };
 
-        // Works, suckily
-        // this.camera.position.x = mouseX + 1000;
-
-        // this.camera.position.x += ( mouseX - this.camera.position.x ) * 0.025;
-        // this.camera.position.y += ( mouseY - this.camera.position.y ) * 0.025;
-        // camera.position.z = particles.geometry.vertices[ pos ].position.z + 300;
-
-
-        // Running into big performance issues when camera rotates around the back of low-end samples
-        // const timer = 0.0001 * Date.now();
-        // this.camera.position.x = Math.cos( timer ) * 1500;
-        // this.camera.position.z = Math.sin( timer ) * 1500;
-        this.camera.lookAt(this.scene.position);
+    this.render = function()
+    {
+        // Autodamping..
+        controls.update();
 
         this.renderer.render(this.scene, this.camera);
     };
@@ -158,16 +143,6 @@ var SpectrumAnalyzer3dRenderer = function(app)
         this.renderer.setSize(app.WIDTH, app.HEIGHT);
     }
 
-
-    var mouseX; // = event.clientX - windowHalfX;
-    var mouseY; // = event.clientY - windowHalfY;
-
-    this.onMouseMove = function( event ) {
-        var windowHalfX = window.innerWidth / 2;
-        var windowHalfY = window.innerHeight / 2;
-        mouseX = event.clientX - windowHalfX;
-        mouseY = event.clientY - windowHalfY;
-    }
 };
 
 export default SpectrumAnalyzer3dRenderer;

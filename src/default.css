@@ -1,0 +1,162 @@
+
+
+body {
+    font-family: sans-serif;
+    padding: 0;
+    margin: 0;
+    background-color: #000;
+    color: #fff;
+}
+
+a {
+    color: gold;
+}
+    a:hover { text-decoration: none; }
+
+audio {
+     /* width: 100%; */
+}
+
+input {
+    font-size: 1.5rem;
+    padding: 1rem;
+    padding-left: 1.75rem;
+    border: 2px solid transparent;
+    width: 0;
+
+    background-color: transparent;
+    background: url(img/search.svg) no-repeat;
+    background-size: auto 50%;
+    background-position: 0.5rem;
+
+    transition: all 0.25s;
+}
+    input:focus {
+        padding-left: 2.5rem;
+        width: auto;
+
+        background-color: #eee;
+    }
+
+
+    input.valid {
+        /* border-color: green; */
+    }
+
+    input.invalid {
+        border-color: red;
+    }
+
+
+ul {
+    margin: 1rem 0;
+    padding: 0;
+}
+
+li {
+    margin: 0 0.5em 0 0;
+    padding: 0;
+    list-style-type: none;
+    display: inline;
+}
+
+
+/* RENDERER */
+
+canvas { position: absolute; z-index: 0; top: 0; left: 0; }
+canvas#colourTable { right: 0; display: none; }
+
+
+/* TODO: Combine with flex-grid */
+
+nav {
+    transition: opacity 0.5s;
+    padding: 1rem;
+    z-index: 1;
+    position: absolute;
+}
+    nav.hide { opacity: 0; }
+
+nav#social {
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+
+/** NAV **/
+
+.flex {
+    display: flex;
+    left: 0;
+    right: 0;
+}
+
+    .flex .col:first-child {
+        text-align: left;
+    }
+
+    .flex .col:last-child {
+        text-align: right;
+    }
+
+.col {
+  text-align: center;
+  flex: 1;
+}
+
+
+
+
+/* DRAG */
+
+html, body { height: 100%; padding: 0; }
+body.over::before {
+    content: '';
+    position: absolute;
+    height: calc(100% - 10px);
+    width: calc(100% - 10px);
+    border: 5px solid gold;
+}
+
+
+#overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    padding: 0 auto;
+    transform: translate(-50%, -50%);
+}
+
+#overlay span {
+    display: inline-block;
+}
+
+span#play {
+    font-size: 5rem;
+    color: gold;
+    opacity: 1;
+    transition: all 0.25s ease-out;
+}
+
+span#play:hover {
+    color: #fff;
+    cursor: pointer;
+}
+
+span#play.hide {
+    /*opacity: 0;*/
+}
+
+span.hide {
+    display: none !important;
+}
+
+
+
+/* LINKS */
+
+.enabled {
+    color: #fff;
+    text-decoration: none;
+}

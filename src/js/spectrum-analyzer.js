@@ -2,8 +2,8 @@ import DefaultRenderer from './renderers/DefaultRenderer';
 import WebGlRenderer from './renderers/WebGlRenderer';
 
 import Audio from './Audio';
-import SoundcloudSource from './audioSources/SoundcloudSource';
-
+import Resolver from './AudioResolver';
+import Router from './Router';
 
 let audio = Audio;
 
@@ -28,12 +28,16 @@ var SpectrumAnalyzer = function()
 
     // Used by router, duplicates SC source module
     this.baseURL = 'https://soundcloud.com/';
+    this.currentUrl = null;
+
+
+    this.tempAudioElement;
 
 
     /**
      * Initialize - and grab an SC URL?
      */
-    this.init = function(playDefault)
+    this.init = function(playDefault = false)
     {
         // Initialize existing links
         var els = document.querySelectorAll('.song');
@@ -43,19 +47,20 @@ var SpectrumAnalyzer = function()
         }
 
         const audioElement = document.querySelector('audio');
-        audioElement.addEventListener('canplay', audioElementHandler.bind(this));
-        audioElement.addEventListener('play', audioElementHandler.bind(this));
-        audioElement.addEventListener('pause', audioElementHandler.bind(this));
+
+        audioElement.addEventListener('canplay', this.audioElementHandler.bind(this));
+        audioElement.addEventListener('play', this.audioElementHandler.bind(this));
+        audioElement.addEventListener('pause', this.audioElementHandler.bind(this));
         audio.init(audioElement);
 
 
-        document.querySelector('#play').addEventListener('click', e => {
+        document.querySelector('#play').addEventListener('click', () => {
             audio.play();
         });
 
-        if (!audio.isWebAudioSupported()) {
-            document.querySelector('p.compatibility').innerHTML = "(Your browser does not support WebAudio)";
-        }
+        // if (!audio.isWebAudioSupported()) {
+        //     document.querySelector('p.compatibility').innerHTML = '(Your browser does not support WebAudio)';
+        // }
 
 
         /* RENDERER */
@@ -65,9 +70,9 @@ var SpectrumAnalyzer = function()
 
         // Check renderer
         if (this.renderer) {
-            console.log('Found renderer', this.renderer);
+            // console.log('Found renderer', this.renderer);
         } else {
-            console.warn('No renderer set, fall back to default');
+            // console.warn('No renderer set, fall back to default');
             this.renderer = new DefaultRenderer(this);
         }
 
@@ -87,63 +92,98 @@ var SpectrumAnalyzer = function()
         window.addEventListener( 'hashchange', this.hashChange.bind(this) );
         window.addEventListener( 'mousemove', this.mouseHandler.bind(this) );
         window.addEventListener( 'resize', this.resize.bind(this) );
+        window.addEventListener('keyup', this.keyHandler.bind(this));
+
+        
 
 
         /* SEARCH */
 
         document.querySelector('input').addEventListener('keyup', e => {
-            this.resolveSoundcloudURL(e.currentTarget.value);
+            const url = e.currentTarget.value;
+            if (Resolver.isValidURL(url)) { 
+                this.resolveUrl(url);
+            }
         });
+
 
 
         /* AUDIO */
 
         // Check for current URL and load
-        var url = this.getURL();
-        if (url != null)
-        {
-            this.resolveSoundcloudURL(url);
+        let url = Router.getURL();
+        // console.log('getURL():', url);
+        if (url != null && url != 'local') {
 
-            // Load track now because URL will be disregarded in setURL (??)
-            this.trackEvent('Load SoundCloud URL', url, null, false);
+            const el = document.querySelector(`.song[href='${url}']`);
+            el.classList.add('enabled');
+            url = el.getAttribute('href');
+            this.currentUrl = url;
+            this.resolveUrl(url);
 
-        // Play default song
         } else if (playDefault) {
 
-            // Show a big loading graphic
-            var url = document.querySelector('.song').getAttribute('href');
-            this.resolveSoundcloudURL(url);
+            // TODO: Add debug flag for local development for this, as I don't want
+            // to be streaming MP3s..
+            //
+            // const songs = ['02 - staring at the sun.mp3','08. tipper - unlock the geometry.mp3','212-andre_3000-behold_a_lady-rns.mp3'];
+            // url = songs[Math.floor(Math.random() * songs.length)];
+
+            // Load first song from links
+            const el = document.querySelector('.song');
+            el.classList.add('enabled');
+            url = el.getAttribute('href');
+            this.currentUrl = url;
+            this.resolveUrl(url);
         }
     };
 
-
-
-    function audioElementHandler(e)
-    {
-        // console.log(e.type);
-        if (e.type == 'canplay') {
-            document.querySelector('span#play').classList.remove('hide');
-        } else if (e.type == 'pause') {
-            document.querySelector('span#play').classList.remove('hide');
-
-            // Fix performance issues with play/pause on audio element
-            if (this.audioAnimation) {
-                cancelAnimationFrame(this.audioAnimation);
-                this.audioAnimation = null;
+    this.keyHandler = function(e) {
+        // Ignore event if it originates from the search box
+        if (e.srcElement.nodeName === 'INPUT') {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+        
+        // console.log(e, e.keyCode, audio);
+        if (e.keyCode == 32) {
+            if (audio.isPaused()) {
+                audio.play();
+            } else {
+                audio.pause();
             }
-        } else if (e.type == 'play') {
-            document.querySelector('span#play').classList.add('hide');
+        }
+    };
 
-            // Rely on user input to start
-            if (audio.isWebAudioSupported()) {
+    // Move all of this into Audio element
+    this.audioElementHandler = function(e) {
+        if (e.type == 'canplay') {
+            if (this.audioAnimation) {
+                // Do nothing, rAF has already been triggered?
+            } else {
+                document.querySelector('span#play').classList.remove('hide');
                 this.update();
             }
+        } else if (e.type == 'pause') {
+            document.querySelector('span#play').classList.remove('hide');
+        } else if (e.type == 'play') {
+            document.querySelector('span#play').classList.add('hide');
         }
     };
 
     // Drive render loop while audio is playing
     this.update = function() {
-        this.renderer.render(audio.getFrequencyValues());
+        if (audio.hasUpdatedData()) {
+            // console.log('Update audio data');
+            this.renderer.updateAudioData(audio.getFrequencyValues());
+
+            // NB: Pushing freq data into a buffer to avoid the boolean was exceptionally slow?
+            // this.renderer.updateAudioData(audio.getData());
+        }
+        this.renderer.render();
+
+        // TODO: Should this be cleared when a new song loads?
         this.audioAnimation = requestAnimationFrame(this.update.bind(this));
     };
 
@@ -171,63 +211,42 @@ var SpectrumAnalyzer = function()
     };
 
     // TODO: Improve this a lot!
-    this.dropHandler = function(e)
-    {
-        // console.log(this, e.currentTarget);
+    this.dropHandler = function(e) {
+        // console.log('dropHandler');
         e.stopPropagation();
         e.preventDefault();
 
-        this.updateStatus('Loading...');
+        const data = e.dataTransfer || e.originalEvent.dataTransfer;
+        Resolver.resolveData(data).then(song => {
+            this.updateStatus(song.name);
+            audio.loadSong(song.src);
+        }).catch(err => {
+            console.warn(err);
+        });
 
-        // This is good
-        var data = e.dataTransfer || e.originalEvent.dataTransfer;
-        if ( data.files.length > 0
-                && data.files[0].name.indexOf( '.mp3' ) > -1
-                )
-        {
-            // Ref: http://stackoverflow.com/questions/10413548/javascript-filereader-using-a-lot-of-memory
-            var url = window.URL || window.webkitURL;
-            var src = url.createObjectURL( data.files[0] );
-            this.updateStatus( data.files[0].name );
-            audio.loadSong( src );
-        }
-        // This is stupid!
-        else if ( data.getData("URL").indexOf('soundcloud.com') > -1 )
-        {
-            console.warn('Undocumented behaviour for debugging!');
-            // this.resolveSoundcloudURL( data.getData("URL") );
-        }
-        else
-        {
-            this.updateStatus( "Sorry, that didn't work - try something else." )
-        }
+        e.currentTarget.classList.remove('over');
 
-        e.currentTarget.classList.remove( 'over' );
-
+        // Necessary?
         return false;
     };
 
 
-    this.mouseHandler = function(e)
-    {
+    this.mouseHandler = () => {
         this.showNav();
     };
 
-    this.resize = function(e)
-    {
+    this.resize = () => {
         this.WIDTH = window.innerWidth;
         this.HEIGHT = window.innerHeight;
 
         if (this.renderer) {
-            // console.log('Resize to ' + this.WIDTH, this.HEIGHT);
             this.renderer.resize();
         } else {
             console.warn('No renderer set');
         }
     };
 
-    this.showNav = function()
-    {
+    this.showNav = function() {
         var els = document.querySelectorAll('nav');
         for ( var i = 0; i < els.length; i++ )
             els[i].classList.remove('hide');
@@ -235,13 +254,11 @@ var SpectrumAnalyzer = function()
         this.hideNav();
     };
 
-    this.hideNav = function()
-    {
+    this.hideNav = function() {
         if ( this.timeout )
             clearTimeout( this.timeout );
 
-        // console.log('Hey!');
-        this.timeout = setTimeout( function(e) {
+        this.timeout = setTimeout(() => {
             var els = document.querySelectorAll('nav');
             for ( var i = 0; i < els.length; i++ )
                 els[i].classList.add('hide');
@@ -252,16 +269,33 @@ var SpectrumAnalyzer = function()
 
     /* UI */
 
-    this.updateStatus = function( str )
-    {
-        document.querySelector('p.status').innerHTML = str;
+    this.updateStatus = function(text, link = null) {
+        const elText = document.createTextNode(text);
+        let el = null;
+        if (link) {
+            el = document.createElement('a');
+            el.setAttribute('href', link);
+            el.appendChild(elText);
+        } else {
+            el = elText;
+        }
+
+        const elParent = document.querySelector('p.status');
+        if (elParent.childNodes.length > 0)
+            elParent.removeChild(elParent.childNodes[0]);
+        elParent.appendChild(el);
     };
 
-    this.loadSongFromClick = function(e)
-    {
+    this.loadSongFromClick = function(e) {
         e.preventDefault();
 
-        // TODO: Centralize this on Audio element?
+        const url = e.currentTarget.getAttribute('href');
+        if (url === this.currentUrl) {
+            return;
+        } else {
+            this.currentUrl = url;
+        }
+
         cancelAnimationFrame(this.audioAnimation);
         this.audioAnimation = null;
 
@@ -273,109 +307,56 @@ var SpectrumAnalyzer = function()
         // Style active link
         e.currentTarget.classList.add('enabled');
 
-
-        var path = e.currentTarget.getAttribute('href');
-        if ( path.indexOf( 'soundcloud' ) > -1 )
-        {
-            this.resolveSoundcloudURL( path );
-        }
-        else
-        {
-            audio.loadSong( path );
-        }
+        this.resolveUrl(url);
     };
 
+    this.resolveUrl = function(url) {
 
+        Resolver.resolveUrl(url).then(song => {
 
-    this.resolveSoundcloudURL = function(url)
-    {
-        // This should be a separate value, e.g. currentValidSource..
-        if (this.currentSource != url) {
-            this.currentSource = url;
-        } else {
-            return;
-        }
+            // TODO: Show a big loading graphic
+            this.updateStatus(song.name, song.link);
 
-        if (SoundcloudSource.isValidURL(url)) {
-            const resolvedURL = SoundcloudSource.resolveURL(url);
-            resolvedURL.then((data) => {
-                // console.log('successMessage:', data);
-                this.onResolveSoundcloudURLSuccess(data);
-            }).catch((err) => {
-                // console.warn('failureMessage:', err);
+            // Update audio source
+            audio.loadSong(song.src);
+
+            Router.setURL(Resolver.getCurrentSource());
+
+            // Update search bar
+            document.querySelector('input').classList.remove('invalid');
+            document.querySelector('input').classList.add('valid');
+
+        }).catch(err => {
+
+            // Temporary convention to work around non-critical rejections
+            if (err instanceof Object) {
+                console.warn(err.msg);
+            } else {
+                console.error(err);
                 document.querySelector('input').classList.remove('valid');
                 document.querySelector('input').classList.add('invalid');
-            });
-            
-        } else {
-            // console.log('Invalid URL');
-            return;
-        }
+            }
+
+        });
     };
-
-    this.onResolveSoundcloudURLSuccess = function(result) {
-
-        // Update status
-        this.updateStatus('Loading...');
-
-        // Update active song link
-        var a = document.createElement('a');
-        a.appendChild( document.createTextNode( result.title ) );
-        a.setAttribute( 'href', result.permalink_url );
-        var el = document.querySelector('p.status');
-        if (el.childNodes.length > 0)
-            el.removeChild(el.childNodes[0]);
-        el.appendChild(a);
-
-        // Update audio source
-        audio.loadSong(SoundcloudSource.getAudioURL(result.stream_url));
-
-        // Update router
-        this.setURL(this.currentSource);
-
-        // Update search bar
-        document.querySelector('input').classList.remove('invalid');
-        document.querySelector('input').classList.add('valid');
-    }
-
 
 
     /* ROUTER */
 
-    this.hashChange = function(e)
-    {
-        if ( e.newURL != this.getURL() )
-            this.resolveSoundcloudURL( this.getURL(e.newURL) );
-    };
-
-    this.getURL = function( url )
-    {
-        if ( url )
-            return this.baseURL + url.substr( url.indexOf( 'url=' ) + 4 );
-
-        if ( window.location.href.indexOf( 'url=' ) > -1 )
-            return this.baseURL + window.location.hash.substr( window.location.hash.indexOf( 'url=' ) + 4 );
-
-        return null;
-    };
-
-    this.setURL = function( url )
-    {
-        if ( this.getURL() == url )
-            return;
-
-        this.trackEvent( 'Load SoundCloud URL', url, null, false );
-
-        url = url.replace( this.baseURL,'' );
-        window.location.hash = 'url=' + url;
+    this.hashChange = function(e) {
+        if (Router.isNewSource(e.newURL)) {
+            this.resolveUrl(Router.getURL(e.newURL));
+        }
     };
 
 
-
-    /** CONVENIENCE **/
-
-    this.trackEvent = function( action, label, value, noninteraction ) {};
+    /* Tracking
+     *
+     * This will be overridden by implementation, e.g.:
+     * 
+     *      this.trackEvent = function(action, label, value, nonInteraction) {};
+     **/
+    this.trackEvent = function() {};
 };
-
 
 export default SpectrumAnalyzer;
